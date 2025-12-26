@@ -1,0 +1,85 @@
+﻿@{
+    ViewBag.Title = "مدیریت شهرها";
+    Layout = Tools.GetLayoutName();
+}
+
+@section Styles{
+    <link href="~/Content/CSS/PersonGroup.css" rel="stylesheet" />
+}
+@using Kendo.Mvc.UI;
+
+<div class="container" style="width:100%; max-width:100%">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4 class="panel-title">شهرها</h4>
+        </div>
+        <div class="panel-body pnlInfo divBorder">
+            <input type="hidden" name="CityID" id="CityID" />
+            <input type="hidden" name="ProvinceID" id="ProvinceID" />
+            <div class="row divMargin divBorder">
+                @(Html.Kendo().Grid<RealEstateAgency.Models.City>()
+                    .Name("gridSearch")
+                    .Columns(col =>
+                    {
+                col.Bound(c => c.CityName).Title("نام شهر");
+                col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='EditCity(#= CityID #)'>ویرایش</a>").Width(50);
+                col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='RemoveCity(#= CityID #)'>حذف</a>").Width(50);
+            })
+            .ToolBar(tb =>
+            {
+                tb.Template(@<text>
+                            <div class="col-md-4" style="margin-right:10px;">
+                                <label>استان:‏</label>
+                                @(Html.Kendo().ComboBox().Name("Province")
+                                .AutoBind(true)
+                                .Placeholder("")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .Events(e => e.Select("OnSelectProvince"))
+                                .DataSource(dataSource =>
+                                {
+                                    dataSource.Read(read => read.Action("LoadProvinceList", "Province"));
+                                }))
+                                <button class="k-button k-button-icontext" type='button' onclick="ShowDivNew()" style="width:auto"><i class='icon-plus'></i> &nbsp;ایجاد</button>
+                            </div>
+                            <div id="divNew" class="col-md-4" style="margin-top:2px; display:none;">
+                                <label>شهر:‏</label>
+                                <input type="text" class="form-control" name="CityName" id="CityName" />
+                                <button class="k-button k-button-icontext" type='button' onclick="Submit()" style="width:auto"><i class=''></i> &nbsp;ثبت</button>
+                                <button class="k-button k-button-icontext" type='button' onclick="CancelInfo()" style="width:auto"><i class=''></i> &nbsp;انصراف</button>
+                            </div>
+                </text>);
+})
+.Selectable()
+.Sortable()
+.Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر")
+.Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+.Operators(msg =>
+{
+msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ")
+.IsEmpty("خالی بودن").IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن")
+.IsNull("نا مشخص بودن"));
+msg.ForNumber(e => e.IsEqualTo("برابر با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن")
+.IsGreaterThan("بزرگتر از").IsGreaterThanOrEqualTo("بزرگتر مساوی").IsLessThan("کوچکتر از").IsLessThanOrEqualTo("کوچکتر مساوی"));
+}))
+.Pageable(pageable => pageable
+.Refresh(true)
+.PageSizes(true)
+.ButtonCount(5)
+.Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها")
+.MorePages("صفحات بیشتر").Next("بعدی").Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+.AutoBind(false)
+.DataSource(ds => ds.Ajax()
+.Model(m => m.Id(p => p.CityID))
+.Read(r => r.Action("Search", "City").Data("GetProvinceID")))
+                )
+            </div>
+
+        </div>
+    </div>
+
+</div>
+<div id="dialog"></div>
+<script src="~/Scripts/RealAgency/City.js">
+</script>
+

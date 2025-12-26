@@ -1,0 +1,163 @@
+﻿@using Kendo.Mvc.UI;
+<div class="row">
+    <div class="col-md-8">
+        <fieldset style="height: 220px; overflow: scroll">
+            <legend>لیست صفحات</legend>
+            <div class="demo-section k-content">
+                @(Html.Kendo().TreeView()
+                  .Name("treeview")
+                  .DataTextField("Name")
+                  .DataSource(dataSource => dataSource.Read(read => read.Action("TreeViewPageList", "PageList")))
+                  .Events(e => e.Select("onSelect")))
+
+            </div>
+        </fieldset>
+    </div>
+    <div class="col-md-3">
+        <fieldset style="height: 220px;">
+            <legend>ویژگی های صفحه</legend>
+            <ul class="list-unstyled">
+                <li style="height: 30px">
+                    <input type="checkbox" id="IsRead" class="k-checkbox" disabled="disabled" />
+                    <label class="k-checkbox-label" id="lblIsRead" for="IsRead" disabled="disabled">دیدن صفحه</label>
+                </li>
+                @*<li style="height: 30px">
+                    <input type="checkbox" id="IsSave" class="k-checkbox" disabled="disabled" />
+                    <label class="k-checkbox-label" id="lblIsSave" for="IsSave" disabled="disabled">اضافه کردن</label>
+                </li>*@
+                <li style="height: 30px">
+                    <input type="checkbox" id="IsUpdate" class="k-checkbox" disabled="disabled" />
+                    <label class="k-checkbox-label" id="lblIsUpdate" for="IsUpdate" disabled="disabled">ایجاد و ویرایش</label>
+                </li>
+                <li style="height: 30px">
+                    <input type="checkbox" id="IsDelete" class="k-checkbox" disabled="disabled" />
+                    <label class="k-checkbox-label" id="lblIsDelete" for="IsDelete" disabled="disabled">حذف کردن</label>
+                </li>
+            </ul>
+            <br />
+            <input type="button" id="btnSavePage" class="k-button k-button-icontext" value="ثبت تغییرات" disabled="disabled" style="width: 100px; margin-bottom: 10px" />
+        </fieldset>
+    </div>
+</div>
+
+<div id="dialogSavePage" class="k-rtl"></div>
+<div id="windowFieldPermission" class="k-rtl">
+</div>
+
+<script>
+    var idTree;
+    var windowFieldPermission;
+
+    $(function () {
+        var dialogSavePage = $('#dialogSavePage');
+        windowFieldPermission = $("#windowFieldPermission");
+
+        dialogSavePage.kendoDialog({
+            width: "450px",
+            title: "پیام سیستم",
+            visible: false,
+            closable: true,
+            modal: true,
+            content: "<p>عملیات با موفقیت انجام شد<p>"
+        });
+
+        $("#btnSavePage").click(function () {
+            $.ajax({
+                cache: false,
+                async: false,
+                type: "post",
+                url: "/PageListPermission/AddPermission",
+                data: {
+                    UserID: $('#SelectedUserID').val(),
+                    PageListID: idTree,
+                    IsRead: $('#IsRead').is(':checked'),
+                    IsSave: $('#IsSave').is(':checked'),
+                    IsUpdate: $('#IsUpdate').is(':checked'),
+                    IsDelete: $('#IsDelete').is(':checked')
+                },
+                dataType: "json",
+                success: function (result) {
+                    dialogSavePage.data("kendoDialog").open();
+                }
+            });
+        });
+    });
+
+
+    function onSelect(e) {
+        idTree = e.sender.dataItem(e.node).get("id");
+        var hasChildren = e.sender.dataItem(e.node).get("hasChildren");
+
+        if (hasChildren == false) {
+            $("#IsRead").removeAttr("disabled");
+            $("#lblIsRead").removeAttr("disabled");
+            $("#IsSave").removeAttr("disabled");
+            $("#lblIsSave").removeAttr("disabled");
+            $("#IsUpdate").removeAttr("disabled");
+            $("#lblIsUpdate").removeAttr("disabled");
+            $("#IsDelete").removeAttr("disabled");
+            $("#lblIsDelete").removeAttr("disabled");
+            $("#btnSavePage").removeAttr("disabled");
+            $("#btnShowFieldPermission").removeAttr("disabled");
+
+            $.ajax({
+                cache: false,
+                async: false,
+                type: "post",
+                url: "/PageListPermission/SelectPageListPermission",
+                data: {
+                    UserID: $('#SelectedUserID').val(),
+                    PageListID: idTree
+                },
+                dataType: "json",
+                success: function (result) {
+
+                    if (result != "null") {
+                        if (result.IsRead) {
+                            $("#IsRead").prop("checked", true);
+                        }
+                        if (!result.IsRead) {
+                            $("#IsRead").prop("checked", false);
+                        }
+                        if (result.IsSave) {
+                            $("#IsSave").prop("checked", true);
+                        }
+                        if (!result.IsSave) {
+                            $("#IsSave").prop("checked", false);
+                        }
+                        if (result.IsUpdate) {
+                            $("#IsUpdate").prop("checked", true);
+                        }
+                        if (!result.IsUpdate) {
+                            $("#IsUpdate").prop("checked", false);
+                        }
+                        if (result.IsDelete) {
+                            $("#IsDelete").prop("checked", true);
+                        }
+                        if (!result.IsDelete) {
+                            $("#IsDelete").prop("checked", false);
+                        }
+                    }
+                    if (result == "null") {
+                        $("#IsRead").removeAttr("checked");
+                        $("#IsSave").removeAttr("checked");
+                        $("#IsUpdate").removeAttr("checked");
+                        $("#IsDelete").removeAttr("checked");
+                    }
+                }
+            });
+        }
+        if (hasChildren == true) {
+            $("#IsRead").attr("disabled", "disabled");
+            $("#lblIsRead").attr("disabled", "disabled");
+            $("#IsSave").attr("disabled", "disabled");
+            $("#lblIsSave").attr("disabled", "disabled");
+            $("#IsUpdate").attr("disabled", "disabled");
+            $("#lblIsUpdate").attr("disabled", "disabled");
+            $("#IsDelete").attr("disabled", "disabled");
+            $("#lblIsDelete").attr("disabled", "disabled");
+            $("#btnSavePage").attr("disabled", "disabled");
+            $("#btnShowFieldPermission").attr("disabled", "disabled");
+        }
+    }
+</script>

@@ -1,0 +1,14 @@
+﻿@{var charts = (List<DotNet.Highcharts.Highcharts>)ViewBag.Charts;
+    <div class="row">
+        <div class="panel ">
+            <div class="panel-header bg-blue">
+                گزارش عملکرد پرسنل
+            </div>
+            <div class="panel-content">
+                <div class="row">
+                    @charts[0]
+                </div>
+            </div>
+        </div>
+    </div>
+}

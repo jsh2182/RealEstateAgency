@@ -1,0 +1,244 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>آژانس مسکن</title>
+    <link href="~/Content/Main/style.css" rel="stylesheet" />
+    <link href="~/Content/Main/theme.css" rel="stylesheet" />
+    <link href="~/Content/Main/ui.css" rel="stylesheet" />
+    <link href="~/Content/Site.css" rel="stylesheet" />
+    <link href="~/Content/FontAwesome/fontawesome-pro-5.7.1-web-ulabs/css/all.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="@Url.Content("~/Content/kendo/kendo.common.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/kendo/kendo.blueopal.min.css")" />
+    <link rel="stylesheet" href="@Url.Content("~/Content/kendo/kendo.blueopal.mobile.min.css")" />
+    <link href="~/Content/kendo/kendo.rtl.min.css" rel="stylesheet" />
+    <link href="~/Content/plugins/font-awesome-animation/font-awesome-animation.min.css" rel="stylesheet" />
+
+    @RenderSection("Styles", required: false)
+    @*SCripts *@
+
+    <script src="~/Scripts/jquery-1.10.2.min.js"></script>
+
+    <script src="@Url.Content("~/Scripts/kendo/kendo.all.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/kendo.aspnetmvc.min.js")"></script>
+    <script src="@Url.Content("~/Scripts/kendo/jszip.min.js")"></script>
+
+
+    <script src="~/Content/plugins/jquery-ui/jquery-ui-1.10.4.min.js"></script>
+    @RenderSection("HeaderScripts", required: false)
+    <script src="~/Content/DatePicker/persian-date.min.js"></script>
+    <link href="~/Content/DatePicker/persian-datepicker.min.css" rel="stylesheet" />
+    <script src="~/Content/DatePicker/persian-datepicker.min.js"></script>
+</head>
+<body class="fixed-topbar rtl theme-sdtd color-purple bg-clean" style="overflow:auto;">
+        <section>
+            <div class="sidebar">
+                <div class="sidebar-inner">
+                    @if (Tools.CurrentUser != null)
+                    {
+                        <div class="sidebar-top small-img clearfix">
+                            <div class="user-details" style="width:100%;text-align:center;margin-left:-7px;margin-top:15px;">
+                                <h4 style="width:100%;color:white;">کاربر : @(RealEstateAgency.Tools.CurrentUser.Name)</h4>
+                            </div>
+                        </div>
+                    }
+                <ul class="nav nav-sidebar" style="margin-top:10px;">
+                    <li class="nav-parent">
+                        <a href="#"><i class="icon-doc"></i><span style="text-align: right;" data-translate="مدیریت مناطق جغرافیایی">مدیریت مناطق جغرافیایی&nbsp;&nbsp;&nbsp; </span> <span class="fa arrow"></span></a>
+                        <ul class="children collapse">
+
+                            <li class="nav-parent">
+                                <ul class="children layer2">
+                                    <li class=""><a href="/Province">استان ها</a></li>
+                                    <li class=""><a href="/City">شهرها</a></li>
+                                    <li class=""><a href="/Zone">مناطق</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-parent">
+                        <a href="#"><i class="icon-doc"></i><span style="text-align: right;" data-translate="مدیریت اشخاص">مدیریت اشخاص&nbsp;&nbsp;&nbsp; </span> <span class="fa arrow"></span></a>
+                        <ul class="children collapse">
+
+                            <li class="nav-parent">
+                                <ul class="children layer2">
+                                    <li class=""><a href="/PersonGroup">مدیریت گروهها</a></li>
+                                    <li class=""><a href="/Person">تعریف و جستجو</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-parent">
+                        <a href="#"><i class="icon-doc"></i><span style="text-align: right;" data-translate="مدیریت فایل‏های مسکن">مدیریت فایل‏ها&nbsp;&nbsp;&nbsp; </span> <span class="fa arrow"></span></a>
+                        <ul class="children collapse">
+
+                            <li class="nav-parent">
+                                <ul class="children layer2">
+                                    <li class=""><a href="/FileGroup">مدیریت گروههای فایلی</a></li>
+                                    <li class=""><a href="/EstateFile">مدیریت فایل ها</a></li>
+                                    <li class=""><a href="/FileReferAndRequest">درخواستهاوارجاعات</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-parent">
+                        <a href="#"><i class="icon-doc"></i><span style="text-align: right;" data-translate="مدیریت رویدادها">مدیریت رویدادها&nbsp;&nbsp;&nbsp; </span> <span class="fa arrow"></span></a>
+                        <ul class="children collapse">
+
+                            <li class="nav-parent">
+                                <ul class="children layer2">
+                                    <li class=""><a href="/PersonEvents/Index">رویدادها</a></li>
+                                </ul>
+                            </li>
+                            <li class="nav-parent">
+                                <ul class="children layer2">
+                                    <li class=""><a href="/PersonEvents/FollowUpEvents">پیگیری ها</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-parent">
+                        <a href="#"><i class="icon-doc"></i><span style="text-align: right;" data-translate="مدیریت تماس‏ها">مدیریت تماس‏ها&nbsp;&nbsp;&nbsp; </span> <span class="fa arrow"></span></a>
+                        <ul class="children collapse">
+
+                            <li class="nav-parent">
+                                <ul class="children layer2">
+                                    <li class=""><a href="#">تاریخچه تماس‏ها</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-parent">
+                        <a href="#"><i class="icon-doc"></i><span style="text-align: right;" data-translate="مدیریت گزارشات">مدیریت گزارشات&nbsp;&nbsp;&nbsp; </span> <span class="fa arrow"></span></a>
+                        <ul class="children collapse">
+
+                            <li class="nav-parent">
+                                <ul class="children layer2">
+                                    <li class=""><a href="/Reports/Index">گزارش عملکرد پرسنل</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                    <li class="nav-parent">
+                        <a href="#"><i class="icon-doc"></i><span style="text-align: right;" data-translate="مدیریت کاربر‏ان">مدیریت کاربر‏ان&nbsp;&nbsp;&nbsp; </span> <span class="fa arrow"></span></a>
+                        <ul class="children collapse">
+
+                            <li class="nav-parent">
+                                <ul class="children layer2">
+                                    <li class=""><a href="/user">کاربران</a></li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </li>
+                </ul>
+                </div>
+            </div>
+            <div class="main-content">
+                <!-- BEGIN TOPBAR -->
+                <div class="topbar" style="width:60px;">
+                    <div class="header-left" style="display: block;">
+                        <div class="topnav">
+                            <a class="menutoggle" href="#" data-toggle="sidebar-collapsed"><span class="menu__handle"><span>Menu</span></span></a>
+                        </div>
+                    </div>
+                    <div class="header-right">
+                        <ul class="header-menu nav navbar-nav">
+                            <!-- BEGIN USER DROPDOWN -->
+
+                            <li class="dropdown" id="user-header">
+                                <a href="#" data-toggle="dropdown" data-selector="dropdown" data-close-others="true">
+                                    <img src="~/Content/Main/avatars/avatar1.png" alt="user image">
+                                    <span class="username">کاربر</span>
+                                </a>
+                                <ul class="dropdown-menu">
+                                    @if (Tools.CurrentUser != null && Tools.CurrentUser.Name != "Temp")
+                                    {
+
+                                        <li>
+                                            <i class="icon-user"></i><span> &nbsp; @RealEstateAgency.Tools.CurrentUser.Name</span>
+                                        </li>
+                                        <li>
+                                            <a href="/Account/LogOff"><span>خروج از سیستم</span></a>
+                                        </li>
+                                    }
+                                    else
+                                    {
+                                        <li>
+                                            <i class="icon-user"></i><span>کاربر مهمان</span>
+                                        </li>
+                                        <li>
+                                            <a href="/Account/Login"><span>ورود به حساب کاربری</span></a>
+                                        </li>
+                                    }
+                                </ul>
+                            </li>
+                            <!-- END USER DROPDOWN -->
+                            <!-- CHAT BAR ICON -->
+                        </ul>
+                    </div>
+                    <!-- header-right -->
+                </div>
+                <!-- END TOPBAR -->
+                <!-- BEGIN PAGE CONTENT -->
+                <div class="page-content" style="background:white;">
+
+                    <div class="row">
+                        <div class="" style="margin-left:15px;">
+                            <h4>شما در اینجا هستید :<b>@ViewBag.Title</b></h4>
+                        </div>
+                    </div>
+                    <hr />
+
+                    @RenderBody()
+
+
+                    <div class="footer">
+                        <div class="copyright">
+                            <p class="pull-left sm-pull-reset">
+
+                                <span><a href="http://www.hoormah.com">تولید نرم افزار</a></span>
+                                <span>و</span>
+                                <span><a href="http://www.hoormah.com">طراحی سایت</a></span>
+                            </p>
+
+
+
+                        </div>
+                    </div>
+                </div>
+                <!-- END PAGE CONTENT -->
+                <!-- END PAGE CONTENT -->
+            </div>
+        </section>
+        <!-- Preloader -->
+        <div class="loader-overlay">
+            <div class="spinner">
+                <div class="bounce1"></div>
+                <div class="bounce2"></div>
+                <div class="bounce3"></div>
+            </div>
+        </div>
+        <a href="#" class="scrollup"><i class="fa fa-angle-up"></i></a>
+        <script src="~/Scripts/Main/Temp/modernizr-2.6.2-respond-1.1.0.min.js"></script>
+
+        <script src="~/Scripts/Main/Temp/main-gsap.min.js"></script>
+        <script src="~/Scripts/Main/Temp/bootstrap.min.js"></script>
+        <script src="~/Scripts/Main/Temp/quickview.js"></script> <!-- Chat Script -->
+        <script src="~/Scripts/Main/Temp/search.js"></script> <!-- Search Script -->
+        <script src="~/Scripts/Main/jquery.cookies.min.js"></script> <!-- Jquery Cookies, for theme -->
+        <script src="~/Scripts/Main/jquery.blockUI.min.js"></script>  @*simulate synchronous behavior when using AJAX*@
+        <script src="~/Scripts/Main/jqueryTranslator.min.js"></script> <!-- Translate Plugin with JSON data -->
+        <script src="~/Scripts/Main/bootbox.min.js"></script> <!-- Modal with Validation -->
+        <script src="~/Scripts/Main/jquery.mCustomScrollbar.concat.min.js"></script> <!-- Custom Scrollbar sidebar -->
+        <script src="~/Scripts/Main/bootstrap-hover-dropdown.min.js"></script> <!-- Show Dropdown on Mouseover -->
+
+        <script src="~/Scripts/Main/backstretch.min.js"></script> <!-- Background Image -->
+        <script src="~/Scripts/Main/bootstrap-progressbar.min.js"></script> <!-- Animated Progress Bar -->
+        <script src="~/Scripts/Main/builder.js"></script> <!-- Theme Builder -->
+        <script src="~/Scripts/Main/sidebar_hover.js"></script> <!-- Sidebar on Hover -->
+        <script src="~/Scripts/Main/application.js"></script> <!-- Main Application Script -->
+        <script src="~/Scripts/Main/plugins.js"></script> <!-- Main Plugin Initialization Script -->
+</body>
+</html>

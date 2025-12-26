@@ -1,0 +1,231 @@
+﻿@{
+    ViewBag.Title = "مدیریت رویدادها";
+    Layout = Tools.GetLayoutName();
+}
+@using Kendo.Mvc.UI;
+<div class="container" style="width:100%; max-width:100%">
+    <div class="row" style="margin-top:10px">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4 class="panel-title">جستجوی اطلاعات </h4>
+                <span class="pull-right clickable" id="SearchPanelClickable"><i class="glyphicon glyphicon-chevron-down"></i></span>
+            </div>
+            @*</div>*@
+            <div class="panel-body" id="panelSearch">
+                <div class="row" style="margin-top:10px">
+                    <form id="frmSearch">
+                        <input type="hidden" id="CreationDate" name="CreationDate" onchange="SetCreationDate()" />
+                        <input type="hidden" id="CreationDateTo" name="CreationDateTo" onchange="SetCreationDate()" />
+                        <div class="row divMargin">
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="labelClass">نام مالک/مشتری:‏</label>
+                                    <input type="text" class="form-control" name="PersonName" id="PersonNameSearch" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">نام مشاور:‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                        .Name("Consultant")
+                                        .HtmlAttributes(new { @id = "ConsultantSearch" })
+                                        .Placeholder("لطفا انتخاب کنید")
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .DataSource(ds => ds.Read(r => r.Action("LoadUserList", "User")))
+                                        .Filter(FilterType.StartsWith))
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">نوع رویداد:‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                        .Name("EventType")
+                                        .HtmlAttributes(new { @id = "EventTypeSearch" })
+                                        .Placeholder("لطفا انتخاب کنید")
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .DataSource(ds => ds.Read(r => r.Action("LoadEventType", "PersonEvents")))
+                                        .Filter(FilterType.StartsWith)
+                                    )
+                                </div>
+
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="labelClass">از تاریخ:‏</label>
+                                    <input type="text" class="form-control" name="PEventDate" id="PEventDateSearch" onchange="EventDateChange()"/>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">تا تاریخ:‏</label>
+                                    <input type="text" class="form-control" name="PEventDateTo" id="PEventDateTo" onchange="EventDateChange()"/>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="labelClass">توضیحات:‏</label>
+                                    <input type="text" name="Description" id="DescriptionSearch" class="form-control" />
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button class="btn btn-success" type="button" onclick="Search()">جستجو</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="row" style="margin-top:10px">
+                    @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.EventSchema>()
+                                   .Name("gridSearchEvents")
+                                   .Columns(col =>
+                                   {
+                                       col.Bound(c => c.PersonName).Title("نام مالک/مشتری");
+                                       col.Bound(c => c.ConsultantName).Title("نام مشاور");
+                                       col.Bound(c => c.EventType).Title("نوع رویداد");
+                                       col.Bound(c => c.PCreationDate).Title("تاریخ ثبت");
+                                       col.Bound(c => c.Description).Title("توضیحات");
+                                    })
+                                   .DataSource(ds => ds.Ajax().Model(m => m.Id(p => p.PersonID)).Read(r => r.Action("SearchEvents", "PersonEvents").Data("GetSearchData")))
+                                   .Events(e => e.Change("OnGridSearchChanged"))
+                                   .AutoBind(false)
+                                   .Selectable()
+                                   .Sortable()
+                                   .ClientDetailTemplateId("DetailsInfo")
+                                   .Events(e => e.DetailInit("detailInit"))
+                                   .Pageable(pageable => pageable
+                                   .Refresh(true)
+                                   .PageSizes(true)
+                                   .ButtonCount(5)
+                                   .Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها").MorePages("صفحات بیشتر").Next("بعدی")
+                                   .Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+                                   .Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر").Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+                                   .Operators(msg =>
+                                   {
+                                       msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ").IsEmpty("خالی بودن").IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن"));
+                                       msg.ForNumber(e => e.IsEqualTo("برابر با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن").IsGreaterThan("بزرگتر از").IsGreaterThanOrEqualTo("بزرگتر مساوی").IsLessThan("کوچکتر از").IsLessThanOrEqualTo("کوچکتر مساوی")
+                                       );
+                                   }))
+                      )
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <span class="pull-right clickable"><i class="glyphicon glyphicon-chevron-down"></i></span>
+                <h4>ثبت اطلاعات</h4>
+            </div>
+            <div class="panel-body">
+                <div class="row" style="margin-top:10px">
+                    <form id="frmEventInfo">
+                        <input type="hidden" name="PersonID" id="PersonID" value="0" />
+                        <input type="hidden" name="CreateByID" id="CreateByID" value="0" />
+                        <input type="hidden" name="EventID" id="EventID" value="0" />
+                        <div class="row">
+                            <div class="col-md-3">
+                                <label class="labelClass">مالک/مشتری:‏</label>
+                                <input type="text" name="PersonName" id="PersonName" class="form-control" oninput="PersonNameOnInput()" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="labelClass">نام مشاور:‏</label>
+                                @(Html.Kendo().ComboBox()
+                                    .Name("Consultant")
+                                    .Placeholder("لطفا انتخاب کنید")
+                                    .DataTextField("Text")
+                                    .DataValueField("Value")
+                                    .DataSource(ds => ds.Read(r => r.Action("LoadUserList", "User")))
+                                    .Filter(FilterType.StartsWith))
+                            </div>
+                            <div class="col-md-3">
+                                <label class="labelClass">نوع رویداد:‏</label>
+                                @(Html.Kendo().ComboBox()
+                                    .Name("EventType")
+                                    .Placeholder("لطفا انتخاب کنید")
+                                    .DataTextField("Text")
+                                    .DataValueField("Value")
+                                    .DataSource(ds => ds.Read(r => r.Action("LoadEventType", "PersonEvents")))
+                                    .Filter(FilterType.StartsWith)
+                                )
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label class="labelClass">توضیحات:‏</label>
+                                <textarea name="Description" id="Description" class="form-control" style="width:95%"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                    <div class="row">
+                        <button type="button" id="btnSubmit" class="btn btn-success" onclick="SubmitEvent()">ثبت اطلاعات</button>
+                        <button type="button" id="btnCancel" class="btn btn-danger" onclick="ResetForm()">انصراف</button>
+                        <button type="button" id="btnShowFollowUp" class="btn btn-blue" onclick="ShowFollowUpWindow()" style="display:none;">ثبت پیگیری</button>
+                    </div>
+                        <div class="row divMargin divBorder" id="divEventDetails" style="display:none;">
+                            <fieldset>
+                                <legend>جزئیات رویداد</legend>
+                                @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.EventDetailSchema>()
+                                    .Name("gridDetails")
+                                    .Columns(col =>
+                                    {
+                                        col.Bound(c => c.DetailName).Title("عنوان");
+                                        col.Bound(c => c.DetailValue).Title("شرح");
+                                        col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='EditDetail(#= DetailID #)'>ویرایش</a>").Width(50);
+                                        col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='RemoveDetail(#= DetailID #)'>حذف</a>").Width(50);
+                                    })
+                                     .Selectable()
+                                     .Sortable()
+                                     .AutoBind(false)
+                                     .DataSource(ds => ds.Ajax()
+                                     .Model(m => m.Id(p => p.DetailID))
+                                     .Read(r => r.Action("SearchDetails", "PersonEvents").Data("GetEventID")))
+                                     .ToolBar(tb => tb
+                                        .Template(@<text>
+                                                    <button class="k-button k-button-icontext" type='button' id="btnNewDetail" onclick="ShowNewDetail()" style="width:auto"><i class='icon-plus'></i> &nbsp;ایجاد</button>
+                                                    <div id="divNewDetail" class="row" style="margin-right:10px; display:none;">
+                                                        <input type="hidden" id="DetailID" name="DetialID" value="0" />
+                                                        <div class="col-md-3 k-rtl">
+                                                            <label>عنوان:‏</label>
+                                                            @(Html.Kendo().ComboBox()
+                                                               .Name("DetailName")
+                                                               .AutoBind(false)
+                                                               .Placeholder("")
+                                                               .DataTextField("Text")
+                                                               .DataValueField("Value")
+                                                               .CascadeFrom("EventType")
+                                                               .DataSource(dataSource => { dataSource.Read(read => read.Action("LoadDetailNames", "PersonEvents").Data("GetEventType")).ServerFiltering(true); }))
+                                                        </div>
+                                                        <div class="col-md-6">
+                                                            <label>شرح:‏</label>
+                                                            <input type="text" class="form-control" id="DetailValue" name="DetailValue" style="width:85%" />
+                                                        </div>
+                                                        <button class="k-button k-button-icontext" type='button' onclick="SubmitDetail()" style="width:auto"><i class=''></i> &nbsp;ثبت</button>
+                                                        <button class="k-button k-button-icontext" type='button' onclick="ResetFormDetail()" style="width:auto"><i class=''></i> &nbsp;انصراف</button>
+                                                    </div>
+                                        </text> )))
+                            </fieldset>
+                        </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="PeopleWindow" class="k-rtl">
+    @Html.Action("PersonPartial", "Person")
+</div>
+<div id="FollowUpWindow"class="k-rtl">
+    @Html.Action("FollowUpPartial", "PersonEvents")
+</div>
+<div id="dialog" class="k-rtl"></div>
+<script id="DetailsInfo" type="text/kendo-tmpl">
+    @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.EventDetailSchema>()
+        .Name("gridEventDetails_#=EventID#")
+        .Columns(col =>
+        {
+            col.Bound(c => c.DetailName).Title("عنوان");
+            col.Bound(c => c.DetailValue).Title("شرح");
+        })
+        .HtmlAttributes(new { style = "with: 200px;" })
+        .ToClientTemplate()
+    )
+</script>
+<script src="~/Scripts/RealAgency/PersonEvents.js">
+
+</script>

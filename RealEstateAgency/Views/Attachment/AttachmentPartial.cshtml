@@ -1,0 +1,36 @@
+﻿@using Kendo.Mvc.UI;
+@using (Html.BeginForm())
+{
+    <div class="row" style="margin-top:20px;margin-bottom:20px;">
+        <div class="row">
+            <div class="col-md-5">
+                <div class="col-md-8">
+                    @(Html.Kendo().Upload()
+                        .Name("uploadFile")
+                        .Async(a => a
+                            .Save("Upload", "Attachment", new { ParentIDAndAttachType = @ViewBag.ParentIDAndAttachType + '_' + Tools.CurrentUser.UserID })
+                            .AutoUpload(true))
+                        .Messages(m => m.Select("انتخاب کنید").Cancel("انصراف").DropFilesHere("فایل را اینجا رها کنید"))
+                .Multiple(false))
+                </div>
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-10">
+                @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.AttachementSchema>()
+                        .Name("AttachList")
+                        .Columns(col =>
+                        {
+                            col.Bound(c => c.AttachmentName).Title("نام فایل");
+                            col.Bound(c => c.PAttachDate).Title("تاریخ ضمیمه");
+                            col.Bound(c => c.AttachByName).Title("کاربر ضمیمه کننده");
+                            col.Template(c => { }).ClientTemplate("<a class='k-button' href=\"/Resources/Attachments/#= AttachmentName #\" download=\"#= AttachmentName #\">دانلود</a>");
+                            col.Template(c => { }).ClientTemplate("<a class='k-button'onClick='DeleteAttachFile(\"#= AttachmentName #\")'>حذف</a>");
+                        })
+                        .AutoBind(true)
+                        .DataSource(ds => ds.Ajax().Model(m => m.Id(a => a.AttachmentID)).Read(r => r.Action("LoadAttachments", "Attachment").Data("AttachAdditionalData(\""+@ViewBag.AttachType+"\")")))
+                )
+            </div>
+        </div>
+    </div>
+}

@@ -1,0 +1,102 @@
+﻿
+@{
+    Layout = Tools.GetLayoutName();
+    ViewBag.Title = "پیگیری ها";
+}
+@using Kendo.Mvc.UI;
+<div class="container" style="width:100%; max-width:100%">
+    <div class="row" style="margin-top:10px">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4 class="panel-title">پیگیری ها </h4>
+                <span class="pull-right clickable" id="SearchPanelClickable"><i class="glyphicon glyphicon-chevron-down"></i></span>
+            </div>
+            <input type="hidden" name="FollowDate" id="FollowDateSearch" />
+            <input type="hidden" name="SelectedFollowID" id="SelectedFollowID" />
+            <div class="panel-body" id="panelSearch">
+                @if (Tools.CurrentUser.IsAdmin)
+                {
+                    <div class="row" style="margin-top:10px" id="divSearch">
+                        <div class="col-md-3 k-rtl">
+                            <label class="labelClass" style="margin-bottom:9px;">نام مشاور:‏</label>
+                            @(Html.Kendo().ComboBox()
+                                .Name("Consultant")
+                                .Placeholder("لطفا انتخاب کنید")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .DataSource(ds => ds.Read(r => r.Action("LoadUserList", "User")))
+                                .Filter(FilterType.StartsWith))
+                        </div>
+                        <div class="col-md-3 k-rtl">
+                            <label class="labelClass" style="margin-bottom:9px;">وضعیت پیگیری:‏</label>
+                            @(Html.Kendo().ComboBox()
+                            .Name("IsDone")
+                            .HtmlAttributes(new { @id="IsDoneSearch"})
+                            .Placeholder("لطفا انتخاب کنید")
+                            .DataTextField("Text")
+                            .DataValueField("Value")
+                            .DataSource(ds => ds.Read(r => r.Action("LoadFollowUpStatus", "PersonEvents")))
+                            .Filter(FilterType.StartsWith))
+                        </div>
+                        <div class="col-md-3">
+                            <label class="labelClass">تاریخ پیگیری:‏</label>
+                            <input type="text" name="PFollowDate" id="PFollowDateSearch" class="form-control" />
+                        </div>
+                        <div class="col-md-2" style="padding-top:5px;">
+                            <label class="labelClass"></label>
+                            <button type="button" class="btn btn-blue" onclick="SearchFollowUps()">جستجو</button>
+                        </div>
+                    </div>
+                }
+                <div class="row" style="margin-top:10px">
+                    @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.FollowUpEventsSchema>()
+                        .Name("gridSearchFollowUps")
+                        .Columns(col =>
+                        {
+                            col.Bound(c => c.FollowUpUserName).Title("مسئول پیگیری");
+                            col.Bound(c => c.PFollowDate).Title("تاریخ پیگیری");
+                            col.Bound(c => c.FollowUpCode).Title("کدپیگیری");
+                            col.Bound(c => c.FollowUpDesc).Title("توضیحات");
+                            col.Bound(c => c.FollowUpResult).Title("نتیجه پیگیری");
+                            col.Template(c => { }).ClientTemplate("<a class='k-button' id='btnFollow#= PersonEventID #' style=\"visibility:#= VisibileProp # \" onClick='ShowFollowUpDiv(#=PersonEventID#, #=FollowUpID#, #=FollowUpCode#)'>پیگیری</a>").Width(120);
+                            col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='OpenEventWindow(#= PersonEventID #)' >نمایش رویداد</a>").Width(110);
+                            col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='ShowFollowUpWindow(#= PersonEventID #)' >پیگیری جدید</a>").Width(110);
+
+                        })
+                        .DataSource(ds => ds.Ajax().Model(m => m.Id(p => p.FollowUpID))
+                                    .Read(r => r.Action("SearchFollowUps", "PersonEvents").Data("GetSearchData")))
+                        .Selectable()
+                        .Sortable()
+                        .Pageable(pageable => pageable
+                        .Refresh(true)
+                        .PageSizes(true)
+                        .ButtonCount(5)
+                        .Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها").MorePages("صفحات بیشتر").Next("بعدی")
+                                        .Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+                        .Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر").Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+                        .Operators(msg =>
+                        {
+                            msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ").IsEmpty("خالی بودن").IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن"));
+                            msg.ForNumber(e => e.IsEqualTo("برابر با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن").IsGreaterThan("بزرگتر از").IsGreaterThanOrEqualTo("بزرگتر مساوی").IsLessThan("کوچکتر از").IsLessThanOrEqualTo("کوچکتر مساوی")
+                        );
+                        }))
+                        .ToolBar(tb => tb.Template(@<text>
+                                            <div id="divFollowUp" class="col-md-9" style="display:none; margin-right:5px;">
+                                                <label>کدپیگیری:‏</label>
+                                                <input type="text" name="FollowUpCode" id="FollowUpCode" class="form-control" readonly />
+                                                <label>نتیجه پیگیری:‏</label>
+                                                <input type="text" id="FollowUpResult" name="FollowUpResult" class="form-control" style="width:35%" />
+                                                <button type="button" class="btn btn-blue" style="height:auto; margin-top:10px;" onclick="FollowUpDone()">ثبت پیگیری</button>
+                                            </div>
+                                            </text>))
+                    )
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="k-rtl" id="dialog"></div>
+<div class="k-rtl" id="PersonEventWindow"></div>
+<div class="k-rtl" id="FollowUpWindow">@Html.Action("FollowUpPartial","PersonEvents")</div>
+<script src="~/Scripts/RealAgency/FollowUpEvents.js"></script>
+

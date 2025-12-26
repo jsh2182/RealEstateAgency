@@ -1,0 +1,84 @@
+﻿@using Kendo.Mvc.UI;
+    <div class="row">
+        <div class="col-md-12" style="border: 1px solid rgb(102, 163, 255);padding:0px;">
+            <div class="col-md-2">
+                <label class="labelClass">نام:‏</label>
+                <input type="text" class="form-control" name="PersonName" id="PersonNameForSearch" />
+            </div>
+            <div class="col-md-2">
+                <label class="labelClass">کداشتراک:‏</label>
+                <input type="text" class="form-control" name="SubscriptionCode" id="SubscriptionCode" />
+            </div>
+            <div class="col-md-2">
+                <label class="labelClass">موبایل:‏</label>
+                <input type="text" class="form-control" name="MobileNumber" id="MobileNumber" />
+            </div>
+            <div class="col-md-2">
+                <label class="labelClass">تلفن:‏</label>
+                <input type="text" class="form-control" name="PhoneNumber" id="PhoneNumber" />
+            </div>
+            <div class="col-md-2">
+                <button type="button" class="btn btn-blue"  id="btnSearchPersonPartial"style="margin-top:28px;height:auto;" onclick="SearchPersonPartial()">جستجو</button>
+            </div>
+        </div>
+        <div class="col-md-12" style="margin-top:15px;padding:0px;">
+            <input type="hidden" id="SelectedPersonID" value="0" />
+            <input type="hidden" id="SelectedPersonName" />
+            <input type="hidden" id="SelectedSubscriptionCode" />
+            @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.PersonSchema>()
+                           .Name("gridSearchPerson")
+                           .HtmlAttributes(new { @style = "width:auto%" })
+                           .Columns(col =>
+                           {
+                               col.Bound(c => c.SubscriptionCode).Title("کد اشتراک").Width(120);
+                               col.Bound(c => c.PersonName).Title("نام و نام خانوادگی");
+                               col.Bound(c => c.PhoneNumber).Title("تلفن");
+                               col.Bound(c => c.MobileNumber).Title("موبایل");
+                               col.Bound(c => c.PersonAddressStreet).Title("آدرس");
+                           })
+                                   .DataSource(ds => ds.Ajax().Model(m => m.Id(p => p.PersonID)).Read(r => r.Action("Search", "Person").Data("GetSearchPersonData")))
+                                   .Events(e => e.Change("OnGridSearchPersonChanged"))
+                                   .AutoBind(false)
+                                   .Selectable()
+                                   .Sortable()
+                                   .Pageable(pageable => pageable
+                                              .Refresh(true)
+                                              .PageSizes(true)
+                                              .ButtonCount(5)
+                                              .Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها").MorePages("صفحات بیشتر").Next("بعدی")
+                                                .Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+                                   .Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر").Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+                                           .Operators(msg =>
+                                           {
+                                               msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ").IsEmpty("خالی بودن").IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن"));
+                                               msg.ForNumber(e => e.IsEqualTo("برابر با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن").IsGreaterThan("بزرگتر از").IsGreaterThanOrEqualTo("بزرگتر مساوی").IsLessThan("کوچکتر از").IsLessThanOrEqualTo("کوچکتر مساوی")
+                                          );
+                                           })))
+        </div>
+        <div class="col-md-4" style="margin-top:10px;">
+            <button type="button" class="btn btn-success" name="btnSelectPerson" style="height:auto;" onclick="SelectPerson()">انتخاب</button>
+            <button type="button" class="btn btn-danger" name ="btnCancelPerson" style="height:auto;" onclick="CancelPerson()">انصراف</button>
+        </div>
+    </div>
+@*<script>
+    function OnGridSearchPersonChanged(e) {    
+        var grid = $('#gridSearchPerson').data('kendoGrid');
+        var data = this.dataItem(grid.select()[0]);
+        $('#SelectedPersonID').val(data.PersonID);
+        $('#SelectedPersonName').val(data.PersonName);
+        $('#SelectedSubscriptionCode').val(data.SubscriptionCode);
+    }
+    function GetSearchPersonData() {
+        return {
+            PersonName: $('#PersonNameForSearch').val(),
+            SubscriptionCode: $('#SubscriptionCode').val(),
+            MobileNumber: $('#MobileNumber').val(),
+            PhoneNumber: $('#PhoneNumber').val()
+
+        }
+    }
+    function SearchPersonPartial() {
+        $('#gridSearchPerson').data('kendoGrid').dataSource.read();
+    }
+
+</script>*@

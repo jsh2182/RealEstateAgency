@@ -1,0 +1,96 @@
+﻿@using Kendo.Mvc.UI;
+<div class="row" style="margin-top:5px; margin-bottom:10px;">
+    <input type="hidden" id="SelectedFileID" value="0" />
+    <input type="hidden" id="SelectedFileCode" value="" />
+    <input type="hidden" id="CallerElement" value="" />
+    <div class="row">
+        <form id="frmSearchFiles">
+            <input type="hidden" name="ForRequest" value="true" />
+            <div class="col-md-3">
+                <label class="labelClass">کد فایل:‏</label>
+                <input type="text" name="FileCode" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="labelClass">نام مالک:‏</label>
+                <input type="text" name="PersonName" class="form-control" />
+            </div>
+            <div class="col-md-3 k-rtl">
+                <label class="labelClass" style="margin-bottom:10px"><span style="color:red">*</span>نوع فایل:‏</label>
+                @(Html.Kendo().ComboBox()
+                      .Name("FileType")
+                      .HtmlAttributes(new { @id = "FileTypeSearch" })
+                      .AutoBind(true)
+                      .DataTextField("Text")
+                      .DataValueField("Value")
+                   .Filter(FilterType.StartsWith)
+                     .DataSource(ds => ds.Read(r => r.Action("LoadFileTypes", "EstateFile")))
+                )
+            </div>
+            <div class="col-md-3 k-rtl">
+                <label class="labelClass" style="margin-bottom:10px"><span style="color:red">*</span>نوع ملک:‏</label>
+                @(Html.Kendo().ComboBox()
+                       .Name("EstateType")
+                       .HtmlAttributes(new { @id = "EstateTypeSearch" })
+                       .AutoBind(true)
+                       .DataTextField("Text")
+                       .DataValueField("Value")
+                       .Filter(FilterType.StartsWith)
+                       .DataSource(ds => ds.Read(r => r.Action("LoadEstateTypes", "EstateFile")))
+                )
+            </div>
+        </form>
+    </div>
+    <div class="row" style="margin-top:10px;">
+        @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.EstateFileSchema>()
+                       .Name("gridSearchFiles")
+                       .Columns(col =>
+                       {
+                           col.Bound(c => c.FileCode).Title("کد فایل");
+                           col.Bound(c => c.PersonName).Title("نام مالک");
+                           col.Bound(c => c.EstateType).Title("نوع ملک");
+                           col.Bound(c => c.FileType).Title("نوع فایل");
+                           col.Bound(c => c.AddressStreet).Title("آدرس");
+                       })
+                       .DataSource(ds => ds.Ajax().Model(m => m.Id(p => p.PersonID)).Read(r => r.Action("Search", "EstateFile").Data("GetSearchData")))
+                               .Events(e => e.Change("OnGridSearchFilesChanged"))
+                               .AutoBind(false)
+                               .Mobile(MobileMode.Auto)
+                               .Selectable()
+                               .Sortable()
+                               .Pageable(pageable => pageable
+                                          .Refresh(true)
+                                          .PageSizes(true)
+                                          .ButtonCount(5)
+                                          .Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها").MorePages("صفحات بیشتر").Next("بعدی")
+                                            .Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+                               .Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر").Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+                                       .Operators(msg =>
+                                       {
+                                           msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ").IsEmpty("خالی بودن").IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن"));
+                                           msg.ForNumber(e => e.IsEqualTo("برابر با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن").IsGreaterThan("بزرگتر از").IsGreaterThanOrEqualTo("بزرگتر مساوی").IsLessThan("کوچکتر از").IsLessThanOrEqualTo("کوچکتر مساوی"));
+                                       })))
+    </div>
+    <div class="row">
+        <button type="button" class="btn btn-blue" style="height:auto" onclick="SearchFiles()">جستجو</button>
+        <button type="button" class="btn btn-success" style="height:auto" onclick="SelectFile()">انتخاب</button>
+    </div>
+</div>
+<script type="text/javascript">
+    function OnGridSearchFilesChanged(e) {
+        let grid = $("#gridSearchFiles").data("kendoGrid");
+        let selectedRow = this.dataItem(grid.select()[0]);
+        let fileID = selectedRow.FileID;
+        $("#SelectedFileCode").val(selectedRow.FileCode);
+        $("#SelectedFileID").val(fileID);
+    }
+    function GetSearchData() {
+        var result = {};
+        $.each($('#frmSearchFiles').serializeArray() , function () {
+            result[this.name] = this.value;
+        });
+        return result;
+    }
+    function SearchFiles() {
+        $('#gridSearchFiles').data('kendoGrid').dataSource.read();
+}
+</script>

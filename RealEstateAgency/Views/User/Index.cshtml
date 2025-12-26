@@ -1,0 +1,109 @@
+﻿@{
+    ViewBag.Title = "مدیریت کاربران";
+}
+@using Kendo.Mvc.UI;
+<div class="container" style="width:100%;max-width:100%;">
+    <div class="panel-group panel-accordion" id="PanelGroup">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4 style="direction:rtl;">
+                    <a class="PanelTitleHeader" data-toggle="collapse" href="#collapseOne" aria-expanded="true">
+                        لیست کاربران
+                    </a>
+                </h4>
+            </div>
+            <div id="collapseOne" class="panel-collapse collapse in" aria-expanded="true" style="">
+                <div class="panel-body">
+                    <div class="container" style="padding:10px;max-width:100%;">
+                        <input type="hidden" id="SelectedUserID" />
+                        
+                        <fieldset id="fldUserInfo" style="display:none;">
+                            <form id="frmUserInfo">
+                                <input type="hidden" id="UserID" name="UserID" />
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <label class="labelClass">نام و نام خانوادگی:‏</label>
+                                        <input type="text" id="Name" name="Name" class="form-control"/>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="labelClass">نام کاربری:‏</label>
+                                        <input type="text" id="UserName" name="UserName" class="form-control"/>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <label class="labelClass">رمز عبور:‏</label>
+                                        <input type="password" id="Password" name="Password" class="form-control"/>
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-md-3">
+                                        <input type="checkbox" id="IsActive" name="IsActive" /><label style="margin-right:5px;" class="span-check">فعــال</label>
+                                    </div>
+                                    <div class="col-md-3">
+                                        <input type="checkbox" id="IsAdmin" name="IsAdmin" /><label style="margin-right:5px;" class="span-check">مدیرسیستم</label>
+                                    </div>
+                                </div>
+                            </form>
+                            <div class="row">
+                                <button class="btn btn-success" type="button" id="btnSubmitUser" onClick="SubmitUser()">ثبت</button>
+                                <button class="btn btn-danger" type="button" id="btnCancel" onClick="ResetForm()">انصراف</button>
+                            </div>
+                        </fieldset>
+                        <div class="row" style="margin-top:10px;padding:10px;">
+
+                            <div class="row">
+                                @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.UserSchema>()
+                                      .Name("UsersGrid")
+                                      .Columns(columns =>
+                                      {
+                                          columns.Bound(o => o.Name).Title("نام و نام خانوادگی");
+                                          columns.Bound(o => o.UserName).Title("نام کاربری");
+                                          columns.Bound(o => o.IsActive).Title("فعالیت").HtmlAttributes(new { @style = "text-align: center;" }).ClientTemplate("<input type='checkbox' #= IsActive ? checked='checked' :'' #  disabled/>");
+                                          columns.Template((c) => { }).ClientTemplate("<a class='k-button' onClick='EditUser(#= UserID #)'>ویرایش</a>");
+                                          columns.Template((c) => { }).ClientTemplate("<a class='k-button' onClick='DeleteUser(#= UserID #)'>حذف</a>");
+                                      })
+                                      .Selectable()
+                                      .Sortable()
+                                      .Filterable()
+                                      .Events(e=>e.Change("UsersGridOnChange"))
+                                      .ToolBar(toolbar =>
+                                      {
+                                          toolbar.Custom().Text("مجوز و دسترسی ها").HtmlAttributes(new { id = "btnPermission" });
+                                          toolbar.Custom().Text("کاربر جدید").HtmlAttributes(new { id = "btnAddNew" });
+                                      })
+                                      .Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر")
+                                                       .Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+                                                       .Operators(msg => msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ").IsEmpty("خالی بودن")
+                                                       .IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با")
+                                                       .IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن"))))
+                                      .Pageable(pageable => pageable
+                                         .Refresh(true)
+                                         .PageSizes(true)
+                                         .ButtonCount(5)
+                                         .Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها").MorePages("صفحات بیشتر").Next("بعدی")
+                                         .Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+                                     .DataSource(dataSource => dataSource
+                                     .Ajax()
+                                     .Model(model => { model.Id(p => p.UserID); })
+                                     .PageSize(5)
+                                 .Read(read => read.Action("ListUser", "User").Type(HttpVerbs.Post))
+                              ))
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="dialog" class="k-rtl"></div>
+<div id="window" class="k-rtl">
+    <div id="TreeViewPageListPartial">
+        @Html.Action("TreeViewPageListPartial", "PageList")
+    </div>
+</div>
+
+<script src="~/Scripts/RealAgency/User.js">
+   
+
+</script>

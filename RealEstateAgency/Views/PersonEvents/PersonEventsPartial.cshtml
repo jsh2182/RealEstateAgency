@@ -1,0 +1,64 @@
+﻿@using Kendo.Mvc.UI;
+<div class="row" style="margin-top:10px">
+    <form id="frmEventInfo">
+        <div class="row">
+            <div class="col-md-3">
+                <label class="labelClass">مالک/مشتری:‏</label>
+                <input type="text" name="PersonName" id="PersonName" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="labelClass">نام مشاور:‏</label>
+                <input type="text" id="ConsultantName" class="form-control" />
+            </div>
+            <div class="col-md-3">
+                <label class="labelClass">نوع رویداد:‏</label>
+                <input type="text" id="EventType" class="form-control" />
+            </div>
+        </div>
+        <div class="row">
+            <div class="col-md-4">
+                <label class="labelClass">توضیحات:‏</label>
+                <textarea name="Description" id="Description" class="form-control" style="width:95%"></textarea>
+            </div>
+        </div>
+    </form>
+    <div class="row divMargin divBorder" id="divEventDetails">
+        <fieldset>
+            <legend>جزئیات رویداد</legend>
+
+            @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.EventDetailSchema>()
+        .Name("gridDetails")
+        .Columns(col =>
+        {
+            col.Bound(c => c.DetailName).Title("عنوان");
+            col.Bound(c => c.DetailValue).Title("شرح");
+        })
+         .Selectable()
+         .Sortable()
+         .AutoBind(false)
+         .DataSource(ds => ds.Ajax()
+         .Model(m => m.Id(p => p.DetailID))
+         .Read(r => r.Action("SearchDetails", "PersonEvents").Data("{eventID:" + @ViewBag.EventID + "}")))
+            )
+        </fieldset>
+    </div>
+
+</div>
+<script type="text/javascript">
+    $(function () {
+        $.ajax({
+            url: "/PersonEvents/GetEvent",
+            data: { eventID:@ViewBag.EventID},
+            type: "POST",
+            dataType: "JSON",
+            success: function (result) {
+                $("#PersonName").val(result.PersonName);
+                $("#ConsultantName").val(result.ConsultantName);
+                $("#EventType").val(result.EventType);
+                $("#Description").val(result.Description);
+                $("#gridDetails").data("kendoGrid").dataSource.read();
+
+            }
+        })
+    })
+</script>

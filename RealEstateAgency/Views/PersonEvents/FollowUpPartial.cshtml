@@ -1,0 +1,112 @@
+﻿@using Kendo.Mvc.UI;
+<div class="row">
+    <form id="frmFollowUp">
+        <input type="hidden" name="FollowDate" id="FollowDate" />
+        <input type="hidden" name="IsDone" id="IsDone" />
+        <input type="hidden" name="PersonEventID" id="PersonEventID" />
+        <div class="row">
+            <div class="col-md-4">
+                <label class="labelClass" style="margin-bottom:8px;">پیگیری کننده:‏</label>
+                @(Html.Kendo().ComboBox()
+                    .Name("FollowUpUserID")
+                    .Placeholder("لطفا انتخاب کنید")
+                    .DataTextField("Text")
+                    .DataValueField("Value")
+                    .DataSource(ds => ds.Read(r => r.Action("LoadUserList", "User")))
+                    .Filter(FilterType.StartsWith))
+            </div>
+            <div class="col-md-2">
+                <label class="labelClass">تاریخ پیگیری:‏</label>
+                <input type="text" name="PFollowDate" id="PFollowDate" class="form-control" />
+            </div>
+        </div>
+        <div class="row">
+            <label class="labelClass">توضیحات:‏</label>
+            <textarea name="FollowUpDesc" id="FollowUpDesc" style="width:70%" class="form-control"></textarea>
+        </div>
+    </form>
+    <div class="row">
+        <div class="col-md-1">
+            <button type="button" class="btn btn-success" style="height:auto" id="btnSubmitFollowUp" onclick="SubmitFollowUp()">ثبت</button>
+        </div>
+        <div class="col-md-1">
+            <button type="button" class="btn btn-danger" style="height:auto" id="btnSubmitFollowUp" onclick="ResetFollowUp()">انصراف</button>
+        </div>
+    </div>
+</div>
+<script type="text/javascript">
+    $(function () {
+        var date;
+        date = $('#PFollowDate').persianDatepicker({
+
+            initialValue: false,
+            inline: false,
+            altField: '#FollowDate',
+            altFormat: 'gregorian',
+            format: 'L',
+            calendar: {
+                persian: {
+                    locale: 'fa'
+                }
+            },
+            toolbox: {
+                calendarSwitch: {
+                    enabled: false
+                }
+            },
+            navigator: {
+                scroll: {
+                    enabled: true
+                }
+            },
+            minDate: new persianDate(),
+            timePicker: {
+                enabled: false,
+                meridiem: {
+                    enabled: true
+                }
+            },
+            observer: true,
+            autoClose: true,
+            altFieldFormatter: function (unixDate) {
+
+                var gregorianDate = new persianDate(unixDate)
+                    .toCalendar('gregorian').toLocale('en').format('YYYY-MM-DD');
+                return (gregorianDate);
+            }
+
+        });
+    })
+    function ResetFollowUp() {
+        $("#FollowDate").val("");
+        $("#IsDone").val(false);
+        $("#PersonEventID").val(0);
+        $("#FollowUpUserID").data("kendoComboBox").value(null);
+        $("#PFollowDate").val("");
+        $("#FollowUpDesc").val("");
+        $("#FollowUpWindow").data("kendoWindow").close();
+
+    }
+    function SubmitFollowUp() {
+
+        $.ajax({
+            url: "/PersonEvents/SubmitFollowUp",
+            data: $("#frmFollowUp").serialize(),
+            type: "POST",
+            dataType: "JSON",
+            success: function (result) {
+                if (result == 200) {
+                    $('#dialog').data('kendoDialog').content('<p>عملیات با موفقیت انجام شد</p>');
+                    ResetFollowUp();
+                }
+                else if (result == 409) {
+                    $('#dialog').data('kendoDialog').content('<p>پیگیری دیگری برای این تاریخ ثبت شده است.‏</p>');
+                }
+                else {
+                    $('#dialog').data('kendoDialog').content('<p>اشکال در انجام عملیات</p>');
+                }
+                $('#dialog').data('kendoDialog').open();
+            }
+        })
+    }
+</script>

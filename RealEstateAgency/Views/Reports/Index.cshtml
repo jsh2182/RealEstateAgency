@@ -1,0 +1,153 @@
+﻿
+@{
+    Layout = Tools.GetLayoutName();
+    ViewBag.Title = "گزارشات";
+}
+@section HeaderScripts{
+    <script src="@Url.Content("~/Scripts/Highcharts-4.0.1/js/highcharts-all.js")" type="text/javascript"></script>
+    <script src="@Url.Content("~/Scripts/Highcharts-4.0.1/js/modules/funnel.js")" type="text/javascript"></script>
+}
+@using Kendo.Mvc.UI;
+<div class="container" style="width:100%; max-width:100%">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4>گزارشات</h4>
+        </div>
+        <div class="panel-body">
+            <input type="hidden" id="DateFrom" />
+            <input type="hidden" id="DateTo" />
+            <div class="row" style="margin-top:10px;">
+                <div class="col-md-3 k-rtl">
+                    <label class="labelClass">نام مشاور:‏</label>
+                    @(Html.Kendo().ComboBox()
+                        .Name("UserID")
+                        .Placeholder("لطفا انتخاب کنید")
+                        .DataTextField("Text")
+                        .DataValueField("Value")
+                        .DataSource(ds => ds.Read(r => r.Action("LoadUserList", "User")))
+                        .Filter(FilterType.StartsWith))
+                </div>
+                <div class="col-md-3">
+                    <label class="labelClass">از تاریخ:‏</label>
+                    <input type="text" id="PDateFrom" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label class="labelClass">تا تاریخ:‏</label>
+                    <input type="text" id="PDateTo" class="form-control" />
+                </div>
+                <div class="col-md-3">
+                    <label class="labelClass" style="margin-bottom:3px;"></label>
+                    <button type="button" class="btn btn-blue" style="height:auto;" onclick="ShowReport()">نمایش</button>
+                </div>
+            </div>
+            <div class="row" id="divPerformanceReport">
+
+            </div>
+        </div>
+    </div>
+</div>
+<div class="k-rtl" id="dialog"></div>
+<script type="text/javascript">
+
+    $(function () {
+        $('#PDateFrom').persianDatepicker({
+
+            initialValue: false,
+            inline: false,
+            altField: '#DateFrom',
+            altFormat: 'gregorian',
+            format: 'L',
+            calendar: {
+                persian: {
+                    locale: 'fa'
+                }
+            },
+            toolbox: {
+                calendarSwitch: {
+                    enabled: false
+                }
+            },
+            navigator: {
+                scroll: {
+                    enabled: true
+                }
+            },
+            timePicker: {
+                enabled: false,
+                meridiem: {
+                    enabled: true
+                }
+            },
+            observer: true,
+            autoClose: true,
+            altFieldFormatter: function (unixDate) {
+
+                var gregorianDate = new persianDate(unixDate)
+                    .toCalendar('gregorian').toLocale('en').format('YYYY-MM-DD');
+                return (gregorianDate);
+            }
+
+        });
+        $('#PDateTo').persianDatepicker({
+
+            initialValue: false,
+            inline: false,
+            altField: '#DateTo',
+            altFormat: 'gregorian',
+            format: 'L',
+            calendar: {
+                persian: {
+                    locale: 'fa'
+                }
+            },
+            toolbox: {
+                calendarSwitch: {
+                    enabled: false
+                }
+            },
+            navigator: {
+                scroll: {
+                    enabled: true
+                }
+            },
+            timePicker: {
+                enabled: false,
+                meridiem: {
+                    enabled: true
+                }
+            },
+            observer: true,
+            autoClose: true,
+            altFieldFormatter: function (unixDate) {
+
+                var gregorianDate = new persianDate(unixDate)
+                    .toCalendar('gregorian').toLocale('en').format('YYYY-MM-DD');
+                return (gregorianDate);
+            }
+
+        });
+        $("#dialog").kendoDialog({
+            width: "450px",
+            title: "پیام سیستم",
+            visible: false,
+            closable: true,
+            modal: true,
+            content: ""
+        });
+    })
+    function ShowReport() {
+        if ($("#DateFrom").val() == "" || $("#DateTo").val() == "") {
+            $("#dialog").data("kendoDialog").content("محدوده تاریخی وارد نشده است");
+            $("#dialog").data("kendoDialog").open();
+            return;
+        }
+        if ($("#UserID").val() == "")
+             {
+            $("#dialog").data("kendoDialog").content("نام مشاور انتخاب نشده است");
+            $("#dialog").data("kendoDialog").open();
+            return;
+        }
+        $("#divPerformanceReport").load('/Reports/PersonnelPerformance?userID=' + $("#UserID").val() + "&DateFrom=" + $("#DateFrom").val() + "&DateTo=" + $("#DateTo").val());
+    }
+</script>
+

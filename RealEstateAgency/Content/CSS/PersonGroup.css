@@ -1,0 +1,38 @@
+﻿body {
+}
+
+.panel-heading {
+    box-shadow: 5px 1px 10px #888888;
+}
+
+.pnl {
+    background-color: rgb(45, 150, 138);
+    border-radius: 2px;
+    color: aliceblue;
+    /*box-shadow: 5px 1px 10px #888888;*/
+    margin-top: 5px;
+}
+
+input {
+    background-color: rgb(238, 255, 204) !important;
+}
+
+button {
+    width: 100%;
+    box-shadow: 0px 1px 2px #888888;
+}
+
+.btn-success {
+    background-color: rgb(0, 179, 179) !important;
+}
+
+.row {
+    margin-top: 10px;
+}
+
+.divBorder {
+    border: 1px solid rgb(102, 163, 255);
+}
+.divMargin {
+    margin-top: 5px !important;
+}

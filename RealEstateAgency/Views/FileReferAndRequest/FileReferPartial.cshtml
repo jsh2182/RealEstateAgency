@@ -1,0 +1,52 @@
+﻿@using Kendo.Mvc.UI;
+<div class="row">
+    <div class="row">
+        <fieldset>
+            <legend>لیست ارجاع ها</legend>
+            @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.FileReferSchema>()
+                            .Name("gridFileReferList")
+                            .Mobile(MobileMode.Auto)
+                            //.ToolBar(t => t.Custom().Text("ثبت ارجاع جدید").HtmlAttributes(new { @id = "btnShowfldFileReferInfo" }))
+                            .Columns(col =>
+                            {
+                                col.Bound(c => c.PReferDate).Title("تاریخ ارجاع");
+                                col.Bound(c => c.ReferByName).Title("ارجاع دهنده");
+                                col.Bound(c => c.ReferToName).Title("ارجاع شونده");
+                                col.Bound(c => c.ReferDesc).Title("توضیحات");
+                                col.Template(c => { }).ClientTemplate("<a class='k-button'onClick='DeleteFileRefer(#= FileReferID #)'>حذف</a>").Width(60);
+                                //col.Template(c => { }).ClientTemplate("<a class='k-button'onClick='ShowFileAttachWindow(#= FileID #)'>ضمیمه ها</a>").Width(60);
+                            })
+                            .Selectable()
+                            .Sortable()
+                            .Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر").Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+                            .Operators(msg =>
+                            {
+                                msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ")
+                                .IsEmpty("خالی بودن").IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن")
+                                .IsNull("نا مشخص بودن"));
+                                msg.ForNumber(e => e.IsEqualTo("برابر با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن")
+                                .IsGreaterThan("بزرگتر از").IsGreaterThanOrEqualTo("بزرگتر مساوی").IsLessThan("کوچکتر از").IsLessThanOrEqualTo("کوچکتر مساوی"));
+                            }))
+                            .Pageable(pageable => pageable
+                            .Refresh(true)
+                            .PageSizes(true)
+                            .ButtonCount(5)
+                            .Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها")
+                            .MorePages("صفحات بیشتر").Next("بعدی").Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+                            .DataSource(ds => ds.Ajax()
+                                .Model(m => m.Id(r => r.FileReferID))
+                                .Read(r => r.Action("SearchRefer", "FileReferAndRequest").Data("{ReferedTo:"+Tools.CurrentUser.UserID+"}")))
+            )
+        </fieldset>
+    </div>
+    <div id="FileReferAttachWindow">
+
+    </div>
+</div>
+@*<script>
+        $("#btnShowfldFileReferInfo").removeAttr("href");
+        $('#btnShowfldFileReferInfo').click(function () {
+            $('#fldFileReferInfo').show(300);
+        })
+
+    </script>*@

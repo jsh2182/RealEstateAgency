@@ -1,0 +1,102 @@
+﻿
+@{
+    ViewBag.Title = "ارجاع ها و درخواستها";
+    Layout = Tools.GetLayoutName();
+}
+@using Kendo.Mvc.UI;
+<div class="container" style="width:100%; max-width:100%">
+    <div class="row" style="margin-top:10px">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4 class="panel-title">درخواست ها </h4>
+                <span class="pull-right clickable" id="SearchPanelClickable"><i class="glyphicon glyphicon-chevron-down"></i></span>
+            </div>
+            <div class="panel-body" id="panelRequests">
+                <div class="row">
+                    @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.FileRequestSchema>()
+                        .Name("gridSearchRequest")
+                        .Columns(col =>
+                        {
+                            col.Bound(c => c.FileCode).Title("کد فایل");
+                            col.Bound(c => c.RequestByName).Title("درخواست کننده");
+                            col.Bound(c => c.PRequestDate).Title("تاریخ درخواست");
+                            col.Bound(c => c.RequestDesc).Title("شرح درخواست");
+                            col.Bound(c => c.RequestType).Title("درخواست").ClientTemplate("<div style='color:red'>#= RequestType #</div>");
+                            col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='EditRequest(#= FileRequestID #)'>ویرایش</a>").Width(50);
+                            col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='DeleteRequest(#= FileRequestID #)'>حذف</a>").Width(50);
+                            col.Template(c => { }).ClientTemplate("<a class='k-button' style=\"height:auto\" onClick='ShowDivNewRefer(#= FileID #)'>ارجاع</a>").Width(50);
+                        })
+                        .Selectable()
+                        .Sortable()
+                        .Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر").Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+                        .Operators(msg =>
+                        {
+                            msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ")
+                            .IsEmpty("خالی بودن").IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن")
+                            .IsNull("نا مشخص بودن"));
+                            msg.ForNumber(e => e.IsEqualTo("برابر با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن")
+                            .IsGreaterThan("بزرگتر از").IsGreaterThanOrEqualTo("بزرگتر مساوی").IsLessThan("کوچکتر از").IsLessThanOrEqualTo("کوچکتر مساوی"));
+                        }))
+                        .Pageable(pageable => pageable
+                        .Refresh(true)
+                        .PageSizes(true)
+                        .ButtonCount(5)
+                        .Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها")
+                        .MorePages("صفحات بیشتر").Next("بعدی").Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+                        .DataSource(ds => ds.Ajax()
+                        .Model(m => m.Id(p => p.FileRequestID))
+                        .Read(r => r.Action("SearchRequest", "FileReferAndRequest")))
+                        .ToolBar(tb =>
+                        {
+                        tb.Template(@<text>
+                                        <div class="col-md-1" style="margin-right:10px;margin-top:3px;">
+                                            <button class="k-button k-button-icontext" type='button' onclick="ShowDivNewRequest()" style="width:auto"><i class='icon-plus'></i> &nbsp;ایجاد</button>
+                                        </div>
+                                        <div id="divNewRequest" class="col-md-7" style="margin-top:2px; display:none;">
+                                            <form id="frmFileRequest">
+                                                <input type="hidden" id="FileRequestID" name="FileRequestID" />
+                                                <input type="hidden" id="RequestedFileID" name="FileID" value="0" />
+                                                <label>فایل درخواستی:‏</label>
+                                                <input type="text" id="RequestFileCode" name="RequestFileCode" class="form-control selectFile" />
+                                                <label>شرح درخواست:‏</label>
+                                                <input type="text" class="form-control" name="RequestDesc" id="RequestDesc" />
+
+                                                <button class="k-button k-button-icontext" type='button' onclick="SubmitRequest()" style="width:auto"><i class=''></i> &nbsp;ثبت</button>
+                                                <button class="k-button k-button-icontext" type='button' onclick="ResetfrmFileRequest()" style="width:auto"><i class=''></i> &nbsp;انصراف</button>
+                                            </form>
+                                        </div>
+                                        <div id="divNewRefer" class="col-md-7" style="margin-top:2px; display:none;">
+                                            <form id="frmFileRefer">
+                                                <input type="hidden" id="ReferFileID" name="FileID" value="0" />
+                                                <input type="hidden" id="ReferedTo" name="ReferedTo" value="0" />
+                                                <input type="hidden" id="RequestID" name="RequestID" value="0" />
+                                                <label>شرح ارجاع:‏</label>
+                                                <input type="text" class="form-control" name="ReferDesc" id="ReferDesc" />
+
+                                                <button class="k-button k-button-icontext" type='button' onclick="ReferFile()" style="width:auto"><i class=''></i> &nbsp;ثبت</button>
+                                                <button class="k-button k-button-icontext" type='button' onclick="ResetfrmFileRefer()" style="width:auto"><i class=''></i> &nbsp;انصراف</button>
+                                            </form>
+                                        </div>
+                        </text>);
+            })
+
+                    )
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4 class="panel-title">ارجاع ها </h4>
+            <span class="pull-right clickable" id="SearchPanelClickable"><i class="glyphicon glyphicon-chevron-down"></i></span>
+        </div>
+        <div class="panel-body" id="panelRefers">
+            @Html.Action( "FileReferPartial","FileReferAndRequest");
+        </div>
+    </div>
+    <div id="dialog" class="k-rtl"></div>
+    <div id="FilesWindow" class="k-rtl">
+        @Html.Action("EstateFilePartial", "EstateFile")
+    </div>
+</div>
+<script src="~/Scripts/RealAgency/FileRequestAndRefer.js"></script>

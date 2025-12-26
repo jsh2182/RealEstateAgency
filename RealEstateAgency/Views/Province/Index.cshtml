@@ -1,0 +1,76 @@
+﻿@{
+    ViewBag.Title = "مدیریت استان ها";
+    Layout = Tools.GetLayoutName();
+}
+
+@section Styles{
+    <link href="~/Content/CSS/PersonGroup.css" rel="stylesheet" />
+}
+@using Kendo.Mvc.UI;
+
+<div class="container" style="width:100%; max-width:100%">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4 class="panel-title">استان ها</h4>
+        </div>
+        <div class="panel-body pnlInfo divBorder">
+            <form id="frmProvince">
+                <input type="hidden" name="ProvinceID" id="ProvinceID" />
+                <fieldset id="fldInfo" style="display:none;">
+                    <legend>تعریف اطلاعات</legend>
+                    <div class="row">
+                        <div class="col-md-5">
+                            <label>نام استان</label>
+                            <input type="text" class="form-control" name="ProvinceName" id="ProvinceName" style="margin-top:-9px;"/>
+                        @*</div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-4">*@
+                            <button type="button" id="btnSubmit" onclick="Submit()" class="btn btn-success" style="width:auto">ثبت</button>
+                            <button type="button" id="btnCancel" onclick="CancelInfo()" class="btn btn-success" style="width:auto">انصراف</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+
+        </div>
+        <div class="row divMargin divBorder">
+            @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.ProvinceSchema>()
+        .Name("gridSearch")
+        .Columns(col =>
+        {
+            col.Bound(c => c.ProvinceName).Title("نام استان");
+            col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='EditProvince(#= ProvinceID #)'>ویرایش</a>").Width(50);
+            col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='RemoveProvince(#= ProvinceID #)'>حذف</a>").Width(50);
+        })
+        .ToolBar(tb => tb.Template("<button class='k-button k-button-icontext' type='button' onclick='ShowPanelInfo()' href='#'></span><i class='icon-plus'></i> &nbsp;ایجاد</a>"))
+        .Selectable()
+        .Sortable()
+        .Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر")
+        .Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+        .Operators(msg =>
+        {
+            msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ")
+            .IsEmpty("خالی بودن").IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن")
+            .IsNull("نا مشخص بودن"));
+            msg.ForNumber(e => e.IsEqualTo("برابر با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن")
+            .IsGreaterThan("بزرگتر از").IsGreaterThanOrEqualTo("بزرگتر مساوی").IsLessThan("کوچکتر از").IsLessThanOrEqualTo("کوچکتر مساوی"));
+        }))
+        .Pageable(pageable => pageable
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها")
+        .MorePages("صفحات بیشتر").Next("بعدی").Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+        .AutoBind(true)
+        .DataSource(ds => ds.Ajax()
+        .Model(m => m.Id(p => p.ProvinceID))
+        .Read(r => r.Action("Search", "Province")))
+            )
+        </div>
+    </div>
+
+</div>
+<script src="~/Scripts/RealAgency/Province.js">
+</script>
+

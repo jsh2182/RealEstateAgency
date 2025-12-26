@@ -1,0 +1,82 @@
+﻿@{
+    ViewBag.Title = "مدیریت مناطق";
+    Layout = Tools.GetLayoutName();
+}
+
+@section Styles{
+    <link href="~/Content/CSS/PersonGroup.css" rel="stylesheet" />
+}
+@using Kendo.Mvc.UI;
+
+<div class="container" style="width:100%; max-width:100%">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4 class="panel-title">مناطق</h4>
+        </div>
+        <div class="panel-body pnlInfo divBorder">
+            <input type="hidden" name="ZoneID" id="ZoneID" />
+            <input type="hidden" name="CityID" id="CityID" />
+            <div class="row divMargin divBorder">
+                @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.ZoneSchema>()
+                    .Name("gridSearch")
+                    .Columns(col =>
+                    {
+                col.Bound(c => c.ZoneName).Title("نام منطقه");
+                col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='EditZone(#= ZoneID #)'>ویرایش</a>").Width(50);
+                col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='RemoveZone(#= ZoneID #)'>حذف</a>").Width(50);
+            })
+            .ToolBar(tb =>
+            {
+                tb.Template(@<text>
+                            <div class="col-md-4" style="margin-right:10px;">
+                                <label>شهر:‏</label>
+                                @(Html.Kendo().ComboBox().Name("City")
+                                .AutoBind(true)
+                                .Placeholder("")
+                                .DataTextField("Text")
+                                .DataValueField("Value")
+                                .Events(e => e.Select("OnSelectCity"))
+                                .DataSource(dataSource =>
+                                {
+                                    dataSource.Read(read => read.Action("LoadCityList", "City"))
+                                        ;
+                                }))
+                            <button class="k-button k-button-icontext" type='button' onclick="ShowDivNew()" style="width:auto"><i class='icon-plus'></i> &nbsp;ایجاد</button>
+                            </div>
+                            <div id="divNew" class="col-md-4" style="margin-top:2px; display:none;">
+                                <label>منطقه:‏</label>
+                                <input type="text" class="form-control" name="ZoneName" id="ZoneName" />
+                                <button class="k-button k-button-icontext" type='button' onclick="Submit()" style="width:auto"><i class=''></i> &nbsp;ثبت</button>
+                                <button class="k-button k-button-icontext" type='button' onclick="CancelInfo()" style="width:auto"><i class=''></i> &nbsp;انصراف</button>
+                            </div>
+                </text>);
+            })
+            .Selectable()
+            .Sortable()
+            .Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر")
+            .Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+            .Operators(msg =>
+            {
+                msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ")
+                .IsEmpty("خالی بودن").IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن")
+                .IsNull("نا مشخص بودن"));
+            }))
+            .Pageable(pageable => pageable
+            .Refresh(true)
+            .PageSizes(true)
+            .ButtonCount(5)
+            .Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها")
+            .MorePages("صفحات بیشتر").Next("بعدی").Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+            .AutoBind(false)
+            .DataSource(ds => ds.Ajax()
+            .Model(m => m.Id(p => p.ZoneID)).Read(r => r.Action("Search", "Zone").Data("GetCityID")))
+            )
+            </div>
+
+        </div>
+    </div>
+
+</div>
+<script src="~/Scripts/RealAgency/Zone.js">
+</script>
+

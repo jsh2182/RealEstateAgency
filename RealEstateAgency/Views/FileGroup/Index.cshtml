@@ -1,0 +1,81 @@
+﻿@{
+    ViewBag.Title = "مدیریت گروه اشخاص";
+    Layout = Tools.GetLayoutName();
+}
+
+@section Styles{
+    <link href="~/Content/CSS/PersonGroup.css" rel="stylesheet" />
+}
+@using Kendo.Mvc.UI;
+
+<div class="container" style="width:100%; max-width:100%">
+    <div class="panel panel-primary">
+        <div class="panel-heading">
+            <h4 class="panel-title">گروه‏های فایلی</h4>
+        </div>
+        <div class="panel-body pnlInfo divBorder">
+            <form id="frmFileGroup">
+                <input type="hidden" name="GroupID" id="GroupID" />
+                <fieldset id="fldInfo" style="display:none;">
+                    <legend>تعریف اطلاعات</legend>
+                    <div class="row">
+                        <div class="col-md-4">
+                            <label>نام گروه</label>
+                            <input type="text" class="form-control" name="GroupName" id="GroupName" />
+                        </div>
+                        <div class="col-md-4">
+                            <label>شرح گروه</label>
+                            <input type="text" class="form-control" name="GroupDesc" id="GroupDesc" />
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-md-1">
+                            <button type="button" id="btnSubmit" onclick="Submit()" class="btn btn-success">ثبت</button>
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+
+        </div>
+        <div class="row divMargin divBorder">
+            @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.FileGroupSchema>()
+        .Name("gridSearch")
+        .Columns(col =>
+        {
+            col.Bound(c => c.GroupName).Title("نام گروه");
+            col.Bound(c => c.GroupDesc).Title("شرح");
+            col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='EditGroup(#= GroupID #)'>ویرایش</a>").Width(50);
+            col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='RemoveGroup(#= GroupID #)'>حذف</a>").Width(50);
+        })
+        .ToolBar(tb => tb.Template("<button class='k-button k-button-icontext' type='button' onclick='ShowPanelInfo()' href='#'></span><i class='icon-plus'></i> &nbsp;ایجاد گروه جدید</a>"))
+        .Selectable()
+        .Events(o => o.Change("onFileGroupGridChanged"))
+        .Sortable()
+        .Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر")
+        .Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+        .Operators(msg =>
+        {
+            msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ")
+            .IsEmpty("خالی بودن").IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن")
+            .IsNull("نا مشخص بودن"));
+            msg.ForNumber(e => e.IsEqualTo("برابر با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن")
+            .IsGreaterThan("بزرگتر از").IsGreaterThanOrEqualTo("بزرگتر مساوی").IsLessThan("کوچکتر از").IsLessThanOrEqualTo("کوچکتر مساوی"));
+        }))
+        .Pageable(pageable => pageable
+        .Refresh(true)
+        .PageSizes(true)
+        .ButtonCount(5)
+        .Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها")
+        .MorePages("صفحات بیشتر").Next("بعدی").Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+        .AutoBind(true)
+        .DataSource(ds => ds.Ajax()
+        .Model(m => m.Id(p => p.GroupID))
+        .Read(r => r.Action("Search", "FileGroup").Data("{FileID:-1 }")))
+            )
+        </div>
+    </div>
+
+</div>
+<div id="dlg" class="k-rtl"></div>
+<script src="~/Scripts/RealAgency/FileGroup.js">
+</script>

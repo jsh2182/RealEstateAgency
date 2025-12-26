@@ -1,0 +1,1005 @@
+﻿
+@{
+    ViewBag.Title = "مدیریت فایلهای مسکن";
+    Layout = Tools.GetLayoutName();
+}
+@using Kendo.Mvc.UI;
+<div class="container" style="width:100%; max-width:100%">
+    <div class="row" style="margin-top:10px">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <h4 class="panel-title">جستجوی اطلاعات </h4>
+                <span class="pull-right clickable" id="SearchPanelClickable"><i class="glyphicon glyphicon-chevron-down"></i></span>
+            </div>
+            <div class="panel-body" id="panelSearch">
+                <div class="row" style="margin-top:10px">
+                    <form id="frmSearch">
+                        <div class="tab_right">
+                            <ul class="nav nav-tabs">
+                                <li class="active"><a href="#tabSearchBaseInfo" data-toggle="tab" aria-expanded="true">اطلاعات اولیه</a></li>
+                                <li class=""><a href="#tabSearchAddressInfo" data-toggle="tab" aria-expanded="false">اطلاعات آدرس</a></li>
+                                <li class=""><a href="#tabOtherInfo" data-toggle="tab" aria-expanded="false">سایر اطلاعات</a></li>
+                                <li class=""><a href="#tabCheckInfo" data-toggle="tab" aria-expanded="false">اطلاعات چک لیستی</a></li>
+                            </ul>
+                            <div class="tab-content">
+                                <div class="tab-pane active" id="tabSearchBaseInfo">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="labelClass">مالک:‏</label>
+                                            <input type="text" class="form-control" name="PersonName" id="PersonNameSearch" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">کد فایل:‏</label>
+                                            <input type="text" class="form-control" name="FileCode" id="FileCodeSearch" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">تعداد اتاق</label>
+                                            <input type="text" class="form-control" name="RoomCount" id="RoomCountSearch" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">توضیحات:‏</label>
+                                            <input type="text" name="FileDescription" id="FileDescriptionSearch" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="labelClass">نوع فایل:‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                  .Name("FileType")
+                                                  .HtmlAttributes(new { @id = "FileTypeSearch" })
+                                                  .AutoBind(true)
+                                                  .DataTextField("Text")
+                                                  .DataValueField("Value")
+                                               .Filter(FilterType.StartsWith)
+                                               .Events(e => e.Select("OnFileTypeChange"))
+                                                 .DataSource(ds => ds.Read(r => r.Action("LoadFileTypes", "EstateFile")))
+                                            )
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">نوع ملک:‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                   .Name("EstateType")
+                                                   .HtmlAttributes(new { @id = "EstateTypeSearch" })
+                                                   .AutoBind(true)
+                                                   .DataTextField("Text")
+                                                   .DataValueField("Value")
+                                                   .Filter(FilterType.StartsWith)
+                                                   //.Events(e => e.Select("OnEstateTypeChanged"))
+                                                   .DataSource(ds => ds.Read(r => r.Action("LoadEstateTypes", "EstateFile")))
+                                            )
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">قیمت واحد:‏</label>
+                                            <input type="number" name="UnitPrice" id="UnitPriceSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">قیمت کل:‏</label>
+                                            <input type="number" name="TotalPrice" id="TotalPriceSearch" class="form-control" />
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="labelClass">جهت نما:‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                          .Name("BuildingFacade")
+                                                          .HtmlAttributes(new { @id = "BuildingFacadeSearch" })
+                                                          .DataTextField("Text")
+                                                          .DataValueField("Value")
+                                                .Filter(FilterType.StartsWith)
+                                                          .DataSource(ds => ds.Read(r => r.Action("LoadBuildingFacade", "EstateFile")))
+                                            )
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">منبع اطلاعات:‏‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                .Name("InformationSource")
+                                                .HtmlAttributes(new { @id = "InformationSourceSearch" })
+                                                .DataTextField("Text")
+                                                .DataValueField("Value")
+                                                .Filter(FilterType.StartsWith)
+                                                .DataSource(ds => ds.Read(r => r.Action("LoadInformationSource", "EstateFile")))
+                                            )
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">سرمایش:‏‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                .Name("Cooling")
+                                                .HtmlAttributes(new { @id = "CoolingSearch" })
+                                                .DataTextField("Text")
+                                                .DataValueField("Value")
+                                                .Filter(FilterType.StartsWith)
+                                                .DataSource(ds => ds.Read(r => r.Action("LoadCoolings", "EstateFile")))
+                                            )
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">گرمایش:‏‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                .Name("Heating")
+                                                .HtmlAttributes(new { @id = "HeatingSearch" })
+                                                .DataTextField("Text")
+                                                .DataValueField("Value")
+                                                .Filter(FilterType.StartsWith)
+                                                .DataSource(ds => ds.Read(r => r.Action("LoadHeatings", "EstateFile")))
+                                            )
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="labelClass">وضعیت:‏‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                .Name("Status")
+                                                .HtmlAttributes(new { @id = "StatusSearch" })
+                                                .DataTextField("Text")
+                                                .DataValueField("Value")
+                                                .Filter(FilterType.StartsWith)
+                                                .DataSource(ds => ds.Read(r => r.Action("LoadStatus", "EstateFile")))
+                                            )
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">وضعیت سند:‏‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                .Name("OwnershipDocumentStatus")
+                                                .HtmlAttributes(new { @id = "OwnershipDocumentStatusSearch" })
+                                                .DataTextField("Text")
+                                                .DataValueField("Value")
+                                                .Filter(FilterType.StartsWith)
+                                                .DataSource(ds => ds.Read(r => r.Action("LoadOwnershipDocumentStatus", "EstateFile")))
+                                            )
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">سرویس بهداشتی:‏‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                .Name("RestRoom")
+                                                .HtmlAttributes(new { @id = "RestRoomSearch" })
+                                                .DataTextField("Text")
+                                                .DataValueField("Value")
+                                                .Filter(FilterType.StartsWith)
+                                                .DataSource(ds => ds.Read(r => r.Action("LoadRestrooms", "EstateFile")))
+                                            )
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="tabSearchAddressInfo" class="tab-pane fade">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="labelClass">استان:‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                .Name("ProvinceID")
+                                                .HtmlAttributes(new { @id = "ProvinceIDSearch" })
+                                                .AutoBind(true)
+                                                .Placeholder("")
+                                                .DataTextField("Text")
+                                                .DataValueField("Value")
+                                                .Filter(FilterType.StartsWith)
+                                                .DataSource(ds => ds.Read(r => r.Action("LoadProvinceList", "Province")).ServerFiltering(false))
+                                            )
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">شهر:‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                .Name("CityID")
+                                                .HtmlAttributes(new { @id = "CityIDSearch" })
+                                                .AutoBind(false)
+                                                .Placeholder("")
+                                                .DataTextField("Text")
+                                                .DataValueField("Value")
+                                                .Filter(FilterType.StartsWith)
+                                                .CascadeFrom("ProvinceIDSearch")
+
+                                                        .DataSource(ds => ds.Read(r => r.Action("LoadCityList", "City").Data("GetProvinceIDForSearch"))
+                                                                  .ServerFiltering(true))
+                                            )
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">منطقه:‏</label>
+                                            @(Html.Kendo().ComboBox()
+                                                   .Name("ZoneID")
+                                                   .HtmlAttributes(new { @id = "ZoneIDSearch" })
+                                                   .AutoBind(false)
+                                                   .Placeholder("")
+                                                   .DataTextField("Text")
+                                                   .DataValueField("Value")
+                                                   .Filter(FilterType.StartsWith)
+                                                   .CascadeFrom("CityIDSearch")
+                                                   .DataSource(ds => ds.Read(r => r.Action("LoadZoneList", "Zone").Data("GetCityIDForSearch")).ServerFiltering(true))
+                                            )
+                                        </div>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="labelClass">خیابان اصلی:‏</label>
+                                            <input type="text" class="form-control" name="AddressStreet" id="AddressStreetSearch" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">کوچه:‏</label>
+                                            <input type="text" class="form-control" name="AddressAlley" id="AddressAlleySearch" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">پلاک:‏</label>
+                                            <input type="text" class="form-control" name="AddressNumber" id="AddressNumberSearch" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="tabOtherInfo" class="tab-pane fade">
+                                    <div class="row">
+                                        <div class="col-md-3">
+                                            <label class="labelClass">تعداد پارکینگ:‏</label>
+                                            <input type="number" name="ParkingCount" id="ParkingCountSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment villa realEstate">
+                                            <label class="labelClass">سن بنا:‏</label>
+                                            <input type="number" name="BuildingAge" id="BuildingAgeSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment villa">
+                                            <label class="labelClass">تعداد خواب مستر:‏</label>
+                                            <input type="number" name="MasterRoomCount" id="MasterRoomCountSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment villa">
+                                            <label class="labelClass">متراژ انباری:‏</label>
+                                            <input type="number" name="StoreRoomArea" id="StoreRoomAreaSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 villa appartment">
+                                            <label class="labelClass">تعداد سرویس بهداشتی:‏</label>
+                                            <input type="number" name="RestRoomCount" id="RestRoomCountSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment villa realEstate">
+                                            <label class="labelClass">واحد در هر طبقه:‏</label>
+                                            <input type="number" name="UnitCountInFloor" id="UnitCountInFloorSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment">
+                                            <label class="labelClass">تعداد لاین آسانسور:‏</label>
+                                            <input type="number" name="ElevatorCount" id="ElevatorCountSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment">
+                                            <label class="labelClass">برند آسانسور:‏</label>
+                                            <input type="number" name="ElevatorBrand" id="ElevatorBrandSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment">
+                                            <label class="labelClass">متراژ تراس:‏</label>
+                                            <input type="number" name="TerraceArea" id="TerraceAreaSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment">
+                                            <label class="labelClass">جنس نما:‏‏</label>
+                                            <input type="text" name="FacadeMaterial" id="FacadeMaterialSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment">
+                                            <label class="labelClass">کفپوش:‏‏</label>
+                                            <input type="text" name="Flooring" id="FlooringSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment">
+                                            <label class="labelClass">ارتفاع سقف لابی:‏</label>
+                                            <input type="number" name="LobbyCeilingHeight" id="LobbyCeilingHeightSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment">
+                                            <label class="labelClass">ارتفاع سقف واحد:‏</label>
+                                            <input type="number" name="UnitCeilingHeight" id="UnitCeilingHeightSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 realEstate villa">
+                                            <label class="labelClass">عرض گذر:‏</label>
+                                            <input type="number" name="PassWidth" id="PassWidthSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 villa">
+                                            <label class="labelClass">متراژ حیاط:‏</label>
+                                            <input type="number" name="YardAread" id="YardAreadSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 commercial villa">
+                                            <label class="labelClass">متراژ زیرزمین:‏</label>
+                                            <input type="number" name="BasementArea" id="BasementAreaSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 villa">
+                                            <label class="labelClass">متراژ طبقه اول:‏</label>
+                                            <input type="number" name="FirstFloorArea" id="FirstFloorAreaSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 villa">
+                                            <label class="labelClass">متراژ طبقه دوم:‏</label>
+                                            <input type="number" name="SecondFloorArea" id="SecondFloorAreaSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 villa">
+                                            <label class="labelClass">متراژ طبقه سوم:‏</label>
+                                            <input type="number" name="ThirdFloorArea" id="ThirdFloorAreaSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 villa">
+                                            <label class="labelClass">متراژ همکف:‏</label>
+                                            <input type="number" name="GroundFloorArea" id="GroundFloorAreaSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 villa">
+                                            <label class="labelClass">پهنه طرح تفصیلی:‏</label>
+                                            <input type="text" name="DetailedPlanArea" id="DetailedPlanAreaSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 villa">
+                                            <label class="labelClass">تعداد آشپزخانه:‏</label>
+                                            <input type="number" name="KitchenCount" id="KitchenCountSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 commercial">
+                                            <label class="labelClass">متراژ تابلو:‏</label>
+                                            <input type="number" name="AreaForBoard" id="AreaForBoardSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 appartment">
+                                            <label class="labelClass">کل واحدها:‏</label>
+                                            <input type="number" name="AllUnitsCount" id="AllUnitsCountSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 realEstate">
+                                            <label class="labelClass">متراژ تجاری:‏</label>
+                                            <input type="number" name="AreaForCommerce" id="AreaForCommerceSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3 office">
+                                            <label class="labelClass">تعداد خط تلفن:‏</label>
+                                            <input type="number" name="PhoneLineCount" id="PhoneLineCountSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">طبقات ساختمان:‏</label>
+                                            <input type="number" name="BuildingFloorCount" id="BuildingFloorCountSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">طبقه آپارتمان:‏</label>
+                                            <input type="number" name="FloorNumber" id="FloorNumberSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">تلفن:‏</label>
+                                            <input type="number" name="EstatePhoneNumber" id="EstatePhoneNumberSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">متراژ کل:‏</label>
+                                            <input type="number" name="Area" id="AreaSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">بر ساختمان:‏</label>
+                                            <input type="number" name="Width" id="WidthSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">زیربنا:‏</label>
+                                            <input type="number" name="BuiltUpArea" id="BuiltUpAreaSearch" class="form-control" />
+                                        </div>
+                                        <div class="col-md-3">
+                                            <label class="labelClass">آشپزخانه:‏</label>
+                                            <input type="text" name="Kitchen" id="KitchenSearch" class="form-control" />
+                                        </div>
+                                    </div>
+                                </div>
+                                <div id="tabCheckInfo" class="tab-pane fade">
+                                    <div class="row">
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasStoreRoomSearch" name="HasStoreRoom" value="false" class="otherInfo" /><label style="margin-right:5px;">انباری</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasElevatorSearch" name="HasElevator" value="false" class="otherInfo" /><label style="margin-right:5px;">آسانسور</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasRemoteDoorSearch" name="HasRemoteDoor" value="false" class="otherInfo" /><label style="margin-right:5px;">درب ریموت</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasBackyardSearch" name="HasBackyard" value="false" class="otherInfo" /><label style="margin-right:5px;">حیاط خلوت</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasVideoDoorPhoneSearch" name="HasVideoDoorPhone" value="false" class="otherInfo" /><label style="margin-right:5px;">آیفون تصویری</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="NeedToRebuildSearch" name="NeedToRebuild" value="false" class="otherInfo" /><label style="margin-right:5px;">نیازمند بازسازی</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="IntegratedSalonSearch" name="IntegratedSalon" value="false" class="otherInfo" /><label style="margin-right:5px;">سالن یک تکه</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="SeparateSuiteSearch" name="SeparateSuite" value="false" class="otherInfo" /><label style="margin-right:5px;">سوئیت مجزا</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasLaundryRoomSearch" name="HasLaundryRoom" value="false" class="otherInfo" /><label style="margin-right:5px;">لاندری</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="ResidentOwnerSearch" name="ResidentOwner" value="false" class="otherInfo" /><label style="margin-right:5px;">مالک ساکن</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="IsRealEstateSearch" name="IsRealEstate" value="false" class="otherInfo" /><label style="margin-right:5px;">مستغلات</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasPoolSearch" name="HasPool" value="false" class="otherInfo" /><label style="margin-right:5px;">استخر</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasSaunaSearch" name="HasSauna" value="false" class="otherInfo" /><label style="margin-right:5px;">سونا</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasJacuzziSearch" name="HasJacuzzi" value="false" class="otherInfo" /><label style="margin-right:5px;">جکوزی</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasRoofGardenSearch" name="HasRoofGarden" value="false" class="otherInfo" /><label style="margin-right:5px;">روف گاردن</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasConferenceHallSearch" name="HasConferenceHall" value="false" class="otherInfo" /><label style="margin-right:5px;">سالن اجتماعات</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasLobbySearch" name="HasLobby" value="false" class="otherInfo" /><label style="margin-right:5px;">لابی</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasGymSearch" name="HasGym" value="false" class="otherInfo" /><label style="margin-right:5px;">سالن جیم</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasCinemaSearch" name="HasCinema" value="false" class="otherInfo" /><label style="margin-right:5px;">سینما</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasBilliardSearch" name="HasBilliard" value="false" class="otherInfo" /><label style="margin-right:5px;">سالن بیلیارد</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasSquashSearch" name="HasSquash" value="false" class="otherInfo" /><label style="margin-right:5px;">سالن اسکواش</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasRoofPoolSearch" name="HasRoofPool" value="false" class="otherInfo" /><label style="margin-right:5px;">استخر روف</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasFurnishedLobbySearch" name="HasFurnishedLobby" value="false" class="otherInfo" /><label style="margin-right:5px;">لابی مبله</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasEntranceSearch" name="HasEntrance" value="false" class="otherInfo" /><label style="margin-right:5px;">ورودی</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasMaidRoomSearch" name="HasMaidRoom" value="false" class="otherInfo" /><label style="margin-right:5px;">میدروم</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasSeparateSittingSearch" name="HasSeparateSitting" value="false" class="otherInfo" /><label style="margin-right:5px;">نشیمن مجزا</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasInteriorPoolSearch" name="HasInteriorPool" value="false" class="otherInfo" /><label style="margin-right:5px;">استخر داخلی</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasCookingKitchenSearch" name="HasCookingKitchen" value="false" class="otherInfo" /><label style="margin-right:5px;">مطبخ</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasFurnishKitchenSearch" name="HasFurnishKitchen" value="false" class="otherInfo" /><label style="margin-right:5px;">آشپزخانه فرنیش</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasGardenPermissionSearch" name="HasGardenPermission" value="false" class="otherInfo" /><label style="margin-right:5px;">نامه باغات دارد</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasRooflessPoolSearch" name="HasRooflessPool" value="false" class="otherInfo" /><label style="margin-right:5px;">استخر روباز</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasBuildingLicenseSearch" name="HasBuildingLicense" value="false" class="otherInfo" /><label style="margin-right:5px;">جواز ساخت</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasPlanCommandSearch" name="HasPlanCommand" value="false" class="otherInfo" /><label style="margin-right:5px;">دستور نقشه</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasWatchmanSearch" name="HasWatchman" value="false" class="otherInfo" /><label style="margin-right:5px;">سرایداری</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="InMallSearch" name="InMall" value="false" class="otherInfo" /><label style="margin-right:5px;">داخل پاساژ</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasPatioSearch" name="HasPatio" value="false" class="otherInfo" /><label style="margin-right:5px;">پاسیو</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasSeparateStaircaseSearch" name="HasSeparateStaircase" value="false" class="otherInfo" /><label style="margin-right:5px;">پاگرد مجزا</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasPanoramaViewSearch" name="HasPanoramaView" value="false" class="otherInfo" /><label style="margin-right:5px;">دید پانوراما</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasSouthViewSearch" name="HasSouthView" value="false" class="otherInfo" /><label style="margin-right:5px;">دیدجنوب</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasNorthViewSearch" name="HasNorthView" value="false" class="otherInfo" /><label style="margin-right:5px;">دیدشمال</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasWoodyViewSearch" name="HasWoodyView" value="false" class="otherInfo" /><label style="margin-right:5px;">دیدمشجر</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasResidentialStatusSearch" name="HasResidentialStatus" value="false" class="otherInfo" /><label style="margin-right:5px;">موقعیت مسکونی</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasGardenDocumentSearch" name="HasGardenDocument" value="false" class="otherInfo" /><label style="margin-right:5px;">سند باغ است</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasOfficeDocumentSearch" name="HasOfficeDocument" value="false" class="otherInfo" /><label style="margin-right:5px;">موقعیت اداری</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasGoodWillSearch" name="HasGoodWill" value="false" class="otherInfo" /><label style="margin-right:5px;">سرقفلی</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="HasOwnershipSearch" name="HasOwnership" value="false" class="otherInfo" /><label style="margin-right:5px;">ملکیت</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="IsFurnituredSearch" name="IsFurnitured" value="false" class="otherInfo" /><label style="margin-right:5px;">مبله</label>
+                                        </div>
+                                        <div class="col-md-2" style="margin-right:15px;">
+                                            <input type="checkbox" id="ToOutsiderSearch" name="ToOutsider" value="false" class="otherInfo" /><label style="margin-right:5px;">بخارجی</label>
+                                        </div>
+                                        <div class="col-md-3" style="margin-right:15px;">
+                                            <input type="checkbox" id="BoardMountableSearch" name="BoardMountable" value="false" class="otherInfo" /><label style="margin-right:5px;">قابلیت نصب تابلو</label>
+                                        </div>
+                                    </div>
+                                    <div class="row" style="margin-right:30px; margin-top:0px;">
+                                        <input type="checkbox" id="HasSemiFurnishKitchenSearch" name="HasSemiFurnishKitchen" value="false" class="otherInfo" /><label style="margin-right:5px;">آشپزخانه نیمه فرنیش</label>
+                                    </div>
+                                    <div class="row" style="margin-right:30px; margin-top:0px;">
+                                        <input type="checkbox" id="HasLobbyManSearch" name="HasLobbyMan" value="false" class="otherInfo" /><label style="margin-right:5px;">لابی من 24ساعته</label>
+                                    </div>
+                                    <div class="row" style="margin-right:30px; margin-top:0px;">
+                                        <input type="checkbox" id="HasServantRestroomSearch" name="HasServantRestroom" value="false" class="otherInfo" /><label style="margin-right:5px;">سرویس مستخدم</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button class="btn btn-success" type="button" onclick="Search()">جستجو</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="row" style="margin-top:10px">
+                    @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.EstateFileSchema>()
+                                   .Name("gridSearch")
+                                   .Columns(col =>
+                                   {
+                                       col.Bound(c => c.FileID).Hidden();
+                                       col.Bound(c => c.FileCode).Title("کد فایل");
+                                       col.Bound(c => c.PersonName).Title("نام مالک");
+                                       col.Bound(c => c.EstateType).Title("نوع ملک");
+                                       col.Bound(c => c.FileType).Title("نوع فایل");
+                                       col.Bound(c => c.AddressStreet).Title("آدرس");
+                                       col.Template(c => { }).ClientTemplate("<a class='k-button' onClick='DeleteFile(#= FileID #)'>حذف</a>").Width(50);
+                                   })
+                                   .DataSource(ds => ds.Ajax().Model(m => m.Id(p => p.FileID)).Read(r => r.Action("Search", "EstateFile").Data("GetSearchData")))
+                                   .Events(e => e.Change("OnGridSearchChanged"))
+                                   .AutoBind(false)
+                                   .Selectable()
+                                   .Sortable()
+                                   .Pageable(pageable => pageable
+                                   .Refresh(true)
+                                   .PageSizes(true)
+                                   .ButtonCount(5)
+                                   .Messages(o => o.Display("نمایش").Empty("یافت نشد").First("ابتدا").ItemsPerPage("تعداد در هر صفحه ی لیست").Last("انتها").MorePages("صفحات بیشتر").Next("بعدی")
+                                   .Of("از").Page("صفحه").Previous("قبل").Refresh("به روز رسانی")))
+                                           .Filterable(o => o.Messages(msg => msg.And("به همراه").Cancel("انصراف").CheckAll("بررسی همه").Clear("پاک کردن").Filter("اعمال فیلتر").Info("اطلاعات").IsFalse("نادرست بودن").IsTrue("صحیح بودن").Operator("عملگر").Or("یا").Search("جستجو").SelectValue("انتخاب").Value("مقدار"))
+                                                   .Operators(msg =>
+                                                   {
+                                                       msg.ForString(e => e.IsEqualTo("برابر با").Contains("شامل شدن").DoesNotContain("شامل نشدن").EndsWith("تمام شدن با ").IsEmpty("خالی بودن").IsNotEmpty("خالی نبودن").StartsWith("شروع شدن با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن"));
+                                                       msg.ForNumber(e => e.IsEqualTo("برابر با").IsNotEqualTo("برابر نبودن با").IsNotNull("نا مشخص نبودن").IsNull("نا مشخص بودن").IsGreaterThan("بزرگتر از").IsGreaterThanOrEqualTo("بزرگتر مساوی").IsLessThan("کوچکتر از").IsLessThanOrEqualTo("کوچکتر مساوی")
+                                                       );
+                                                   })))
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+        <div class="panel panel-primary">
+            <div class="panel-heading">
+                <span class="pull-right clickable panel-collapsed" id="panelInfoClickable"><i class="glyphicon glyphicon-chevron-up"></i></span>
+                <h4>ثبت اطلاعات</h4>
+            </div>
+            <div class="panel-body k-rtl" style="display:none;" id="panelInfo">
+                <div class="row" style="margin-top:10px">
+                    <form id="frmFileInfo">
+
+                        <input type="hidden" name="FileID" id="FileID" value="0" />
+                        <input type="hidden" name="PersonID" id="PersonID" value="0" />
+
+                        <fieldset>
+                            <legend>اطلاعات کلی:‏</legend>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>نوع فایل:‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                           .Name("FileType")
+                                           .HtmlAttributes(new { @isRequired = "" })
+                                           .AutoBind(true)
+                                           .DataTextField("Text")
+                                           .DataValueField("Value")
+                                        .Filter(FilterType.StartsWith)
+                                        .Events(e => e.Select("OnFileTypeChange"))
+                                          .DataSource(ds => ds.Read(r => r.Action("LoadFileTypes", "EstateFile")))
+                                    )
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>نوع ملک:‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                           .Name("EstateType")
+                                           .HtmlAttributes(new { @isRequired = "" })
+                                           .AutoBind(true)
+                                           .DataTextField("Text")
+                                           .DataValueField("Value")
+                                           .Filter(FilterType.StartsWith)
+                                           .Events(e => e.Select("OnEstateTypeChanged"))
+                                           .DataSource(ds => ds.Read(r => r.Action("LoadEstateTypes", "EstateFile")))
+                                    )
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>مالک:‏</label>
+                                    <input type="text" class="form-control" name="PersonName" id="PersonName" oninput="PersonNameOnInput()" isRequired />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">کد فایل:‏</label>
+                                    <input type="number" class="form-control" name="FileCode" id="FileCode" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="labelClass">جهت نما:‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                                  .Name("BuildingFacade")
+                                                  .DataTextField("Text")
+                                                  .DataValueField("Value")
+                                        .Filter(FilterType.StartsWith)
+                                                  .DataSource(ds => ds.Read(r => r.Action("LoadBuildingFacade", "EstateFile")))
+                                    )
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>متراژ کل:‏</label>
+                                    <input type="number" name="Area" id="Area" class="form-control" value="0" min="0" isRequired />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>قیمت واحد:‏</label>
+                                    <input type="number" name="UnitPrice" id="UnitPrice" min="0" class="form-control" value="0" isRequired />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>قیمت کل:‏</label>
+                                    <input type="number" name="TotalPrice" id="TotalPrice" min="0" class="form-control" value="0" isRequired />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>منبع اطلاعات:‏‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                        .Name("InformationSource")
+                                        .HtmlAttributes(new { @isRequired = "" })
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .Filter(FilterType.StartsWith)
+                                        .DataSource(ds => ds.Read(r => r.Action("LoadInformationSource", "EstateFile")))
+                                    )
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>وضعیت:‏‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                        .Name("Status")
+                                        .HtmlAttributes(new { @isRequired = "" })
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .Filter(FilterType.StartsWith)
+                                        .DataSource(ds => ds.Read(r => r.Action("LoadStatus", "EstateFile")))
+                                    )
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">وضعیت سند:‏‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                        .Name("OwnershipDocumentStatus")
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .Filter(FilterType.StartsWith)
+                                        .DataSource(ds => ds.Read(r => r.Action("LoadOwnershipDocumentStatus", "EstateFile")))
+                                    )
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">سرمایش:‏‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                        .Name("Cooling")
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .Filter(FilterType.StartsWith)
+                                        .DataSource(ds => ds.Read(r => r.Action("LoadCoolings", "EstateFile")))
+                                    )
+                                </div>
+                            </div>
+                            <div class="row">
+
+                                <div class="col-md-3">
+                                    <label class="labelClass">گرمایش:‏‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                        .Name("Heating")
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .Filter(FilterType.StartsWith)
+                                        .DataSource(ds => ds.Read(r => r.Action("LoadHeatings", "EstateFile")))
+                                    )
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">سرویس بهداشتی:‏‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                        .Name("RestRoom")
+                                        .DataTextField("Text")
+                                        .DataValueField("Value")
+                                        .Filter(FilterType.StartsWith)
+                                        .DataSource(ds => ds.Read(r => r.Action("LoadRestrooms", "EstateFile")))
+                                    )
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">ودیعه:‏</label>
+                                    <input type="number" name="Deposit" id="Deposit" class="form-control" min="0" value="0" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">اجاره:‏</label>
+                                    <input type="number" name="Rent" id="Rent" min="0" class="form-control" value="0" />
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <label class="labelClass">توضیحات:‏</label>
+                                    <textarea class="form-control" name="FileDescription" id="FileDescription" style="width:87% !important"></textarea>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <fieldset>
+                            <legend>اطلاعات آدرس:‏</legend>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="labelClass">استان:‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                            .Name("ProvinceID")
+                                            .Placeholder("لطفا انتخاب کنید")
+                                            .DataTextField("Text")
+                                            .DataValueField("Value")
+                                            .DataSource(ds => ds.Read(r => r.Action("LoadProvinceList", "Province")))
+                                            .AutoBind(true)
+                                            .Filter(FilterType.StartsWith)
+                                    )
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">شهر:‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                           .Name("CityID")
+                                           .Placeholder("")
+                                           .DataTextField("Text")
+                                           .DataValueField("Value")
+                                           .CascadeFrom("ProvinceID")
+                                           .DataSource(ds => ds.Read(r => r.Action("LoadCityList", "City").Data("GetProvinceID")).ServerFiltering(true))
+                                           .Filter(FilterType.StartsWith)
+                                    )
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>منطقه:‏</label>
+                                    @(Html.Kendo().ComboBox()
+                                           .Name("ZoneID")
+                                           .HtmlAttributes(new { @isRequired = "" })
+                                           .Placeholder("")
+                                           .DataTextField("Text")
+                                           .DataValueField("Value")
+                                           .CascadeFrom("CityID")
+                                           .DataSource(ds => ds.Read(r => r.Action("LoadZoneList", "Zone").Data("GetCityID")).ServerFiltering(true))
+                                           .Filter(FilterType.StartsWith)
+                                    )
+                                </div>
+                            </div>
+                            <div class="row">
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>خیابان:‏</label>
+                                    <textarea class="form-control" name="AddressStreet" id="AddressStreet" style="width:80% !important" isRequired></textarea>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>کوچه:‏</label>
+                                    <textarea class="form-control" name="AddressAlley" id="AddressAlley" style="width:80% !important" isRequired></textarea>
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>پلاک:‏</label>
+                                    <textarea class="form-control" name="AddressNumber" id="AddressNumber" style="width:80% !important" isRequired></textarea>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <div class="row">
+                            <fieldset>
+                                <legend>سایر اطلاعات</legend>
+                                <div class="col-md-3">
+                                    <label class="labelClass">تعداد پارکینگ:‏</label>
+                                    <input type="number" name="ParkingCount" id="ParkingCount" class="form-control" value="0" min="0"/>
+                                </div>
+                                <div class="col-md-3 appartment villa realEstate">
+                                    <label class="labelClass">سن بنا:‏</label>
+                                    <input type="number" name="BuildingAge" id="BuildingAge" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 appartment villa">
+                                    <label class="labelClass">تعداد خواب مستر:‏</label>
+                                    <input type="number" name="MasterRoomCount" id="MasterRoomCount" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 appartment villa">
+                                    <label class="labelClass">متراژ انباری:‏</label>
+                                    <input type="number" name="StoreRoomArea" id="StoreRoomArea" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 villa appartment">
+                                    <label class="labelClass">تعداد سرویس بهداشتی:‏</label>
+                                    <input type="number" name="RestRoomCount" id="RestRoomCount" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 appartment villa realEstate">
+                                    <label class="labelClass"><span style="color:red">*</span>واحد در هر طبقه:‏</label>
+                                    <input type="number" name="UnitCountInFloor" id="UnitCountInFloor" class="form-control" value="0" min="0" isRequired />
+                                </div>
+                                <div class="col-md-3 appartment">
+                                    <label class="labelClass">تعداد لاین آسانسور:‏</label>
+                                    <input type="number" name="ElevatorCount" id="ElevatorCount" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 appartment">
+                                    <label class="labelClass">برند آسانسور:‏</label>
+                                    <input type="text" name="ElevatorBrand" id="ElevatorBrand" class="form-control" />
+                                </div>
+                                <div class="col-md-3 appartment">
+                                    <label class="labelClass">متراژ تراس:‏</label>
+                                    <input type="number" name="TerraceArea" id="TerraceArea" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 appartment">
+                                    <label class="labelClass">جنس نما:‏‏</label>
+                                    <input type="text" name="FacadeMaterial" id="FacadeMaterial" class="form-control" />
+                                </div>
+                                <div class="col-md-3 appartment">
+                                    <label class="labelClass">کفپوش:‏‏</label>
+                                    <input type="text" name="Flooring" id="Flooring" class="form-control" />
+                                </div>
+                                <div class="col-md-3 appartment">
+                                    <label class="labelClass">ارتفاع سقف لابی:‏</label>
+                                    <input type="number" name="LobbyCeilingHeight" id="LobbyCeilingHeight" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 appartment">
+                                    <label class="labelClass">ارتفاع سقف واحد:‏</label>
+                                    <input type="number" name="UnitCeilingHeight" id="UnitCeilingHeight" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 realEstate villa">
+                                    <label class="labelClass">عرض گذر:‏</label>
+                                    <input type="number" name="PassWidth" id="PassWidth" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 villa">
+                                    <label class="labelClass">متراژ حیاط:‏</label>
+                                    <input type="number" name="YardAread" id="YardAread" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 commercial villa">
+                                    <label class="labelClass">متراژ زیرزمین:‏</label>
+                                    <input type="number" name="BasementArea" id="BasementArea" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 villa">
+                                    <label class="labelClass">متراژ طبقه اول:‏</label>
+                                    <input type="number" name="FirstFloorArea" id="FirstFloorArea" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 villa">
+                                    <label class="labelClass">متراژ طبقه دوم:‏</label>
+                                    <input type="number" name="SecondFloorArea" id="SecondFloorArea" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 villa">
+                                    <label class="labelClass">متراژ طبقه سوم:‏</label>
+                                    <input type="number" name="ThirdFloorArea" id="ThirdFloorArea" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 villa">
+                                    <label class="labelClass">متراژ همکف:‏</label>
+                                    <input type="number" name="GroundFloorArea" id="GroundFloorArea" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 villa">
+                                    <label class="labelClass">پهنه طرح تفصیلی:‏</label>
+                                    <input type="number" name="DetailedPlanArea" id="DetailedPlanArea" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 villa">
+                                    <label class="labelClass">تعداد آشپزخانه:‏</label>
+                                    <input type="number" name="KitchenCount" id="KitchenCount" class="form-control" />
+                                </div>
+                                @*<div class="col-md-3 appartment">
+                                        <label class="labelClass">متراژ تراس:‏</label>
+                                        <input type="number" name="BalconyArea" id="BalconyArea" class="form-control" />
+                                    </div>*@
+                                <div class="col-md-3 commercial">
+                                    <label class="labelClass">متراژ تابلو:‏</label>
+                                    <input type="number" name="AreaForBoard" id="AreaForBoard" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3 appartment">
+                                    <label class="labelClass"><span style="color:red">*</span>کل واحدها:‏</label>
+                                    <input type="number" name="AllUnitsCount" id="AllUnitsCount" class="form-control" value="0" min="0" isRequired />
+                                </div>
+                                <div class="col-md-3 realEstate">
+                                    <label class="labelClass">متراژ تجاری:‏</label>
+                                    <input type="number" name="AreaForCommerce" id="AreaForCommerce" value="0" min="0" class="form-control" />
+                                </div>
+                                <div class="col-md-3 office">
+                                    <label class="labelClass">تعداد خط تلفن:‏</label>
+                                    <input type="number" name="PhoneLineCount" id="PhoneLineCount" value="0" min="0" class="form-control" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">تعداد اتاق:‏</label>
+                                    <input type="number" name="RoomCount" id="RoomCount" value="0" min="0" class="form-control" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>طبقات ساختمان:‏</label>
+                                    <input type="number" name="BuildingFloorCount" id="BuildingFloorCount" class="form-control" value="0" min="0" isRequired />
+                                </div>
+                                <div class="col-md-3 appartment">
+                                    <label class="labelClass">طبقه آپارتمان:‏</label>
+                                    <input type="number" name="FloorNumber" id="FloorNumber" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">تلفن:‏</label>
+                                    <input type="number" name="EstatePhoneNumber" id="EstatePhoneNumber" class="form-control" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">بر ساختمان:‏</label>
+                                    <input type="number" name="Width" id="Width" class="form-control" value="0" min="0" />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass"><span style="color:red">*</span>زیربنا:‏</label>
+                                    <input type="number" name="BuiltUpArea" id="BuiltUpArea" class="form-control" value="0" min="0" isRequired />
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="labelClass">آشپزخانه:‏</label>
+                                    <input type="text" name="Kitchen" id="Kitchen" class="form-control" />
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="row">
+                            <fieldset>
+                                <legend>آگهی</legend>
+                                <div class="col-md-4">
+                                    <label class="labelClass">متن آگهی اول</label>
+                                    <textarea id="AdvContent1" name="AdvContent1" class="form-control" style="width:90%"></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="labelClass">متن آگهی دوم</label>
+                                    <textarea id="AdvContent2" name="AdvContent2" class="form-control" style="width:90%"></textarea>
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="labelClass">متن آگهی سوم</label>
+                                    <textarea id="AdvContent3" name="AdvContent3" class="form-control" style="width:90%"></textarea>
+                                </div>
+                            </fieldset>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-3">
+                                <button type="button" class="btn btn-blue" onclick="OpenAttachWindow()">ضمیمه ‏ها</button>
+                                <button type="button" class="btn btn-blue" onclick="OpenFileOtherInfoWindow()">اطلاعات چک لیستی</button>
+                            </div>
+                        </div>
+                        <div class="row" style="margin-bottom:15px;">
+                            <fieldset>
+                                <legend>گروهبندی</legend>
+                                @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.FileGroupSchema>()
+                                                .Name("gridFileGroups")
+                                                .Columns(col =>
+                                                        {
+                                                    col.Bound(c => c.GroupName).Title("نام گروه");
+                                                    col.Bound(c => c.GroupDesc).Title("شرح");
+                                                })
+                                                .AutoBind(false)
+                                                .ToolBar(tb => tb.Custom().Text("انتخاب گروه").HtmlAttributes(new { @id = "btnSelectGroup" }))
+                                                .Scrollable()
+                                                .Selectable()
+                                                .DataSource(ds => ds.Ajax().Model(m => m.Id(p => p.GroupID)).Read(r => r.Action("Search", "FileGroup").Data("GetFileID")))
+                                )
+                            </fieldset>
+                        </div>
+                        <div class="row">
+                            <button type="button" id="btnSubmit" class="btn btn-success" onclick="Submit()">ثبت اطلاعات</button>
+                            <button type="button" id="btnhowFileReferWindow" class="btn btn-success" onclick="ShowFileReferWindow()">ارجاع ها</button>
+                            <button type="button" id="btnCancel" class="btn btn-danger" onclick="ResetForm()">فرم جدید/انصراف</button>
+                        </div>
+                        <div id="FilesOtherInfoWindow" class="k-rtl">@Html.Action("EstateFileOtherInfoPartial", "EstateFile")</div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div id="dialog" class="k-rtl"></div>
+<div id="GroupsWindow" class="k-rtl">
+    <div class="row">
+        <fieldset>
+            <legend>گروهبندی</legend>
+            @(Html.Kendo().Grid<RealEstateAgency.Models.Schema.FileGroupSchema>()
+                           .Name("gridSelectFileGroup")
+                           .AutoBind(true)
+                           .Columns(col =>
+                           {
+                               col.Bound(c => c.GroupID).Title("انتخاب")
+                                    .ClientTemplate("<input type=\"checkbox\" name=\"GroupID\" class=\"Groups\" id=\"Group#=GroupID#\" value=\"#=GroupID#\" />");
+                               col.Bound(c => c.GroupName).Title("نام گروه");
+                           })
+                           .DataSource(ds => ds.Ajax().Model(m => m.Id(p => p.GroupID)).Read("LoadAllGroups", "FileGroup"))
+            )
+        </fieldset>
+    </div>
+    <div class="row">
+        <div class="col-md-4">
+            <button type="button" class="btn btn-success" id="btnSelectGroup" onclick="SelectGroup()">انتخاب</button>
+        </div>
+    </div>
+</div>
+<div id="PeopleWindow" class="k-rtl">
+    @Html.Action("PersonPartial", "Person")
+</div>
+<div id="AttachmentWindow" class="k-rtl">
+    @*@Html.Action("AttachmentPartial", "Attachment")*@
+</div>
+<div id="FileReferWindow" class="k-rtl">
+
+</div>
+<script src="~/Scripts/RealAgency/EstateFile.js">
+
+</script>
